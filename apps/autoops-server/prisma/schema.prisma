@@ -1,0 +1,445 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider     = "mysql"
+  relationMode = "prisma"
+}
+
+// ==================== 原有模型 ====================
+
+enum TaskType {
+  NOTIFY
+  SMS
+  HTTPS_ISSUE
+  CERT_ISSUE
+  CERT_RENEW
+  HEALTH_CHECK
+  EMAIL_SEND
+  DEPLOY_EXECUTE
+}
+
+enum DeploymentStorageType {
+  LOCAL
+  QINIU
+}
+
+enum DeploymentTargetType {
+  ECS
+  FC
+  SERVERLESS
+}
+
+enum DeploymentRecordStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  ROLLED_BACK
+}
+
+enum TaskStatus {
+  READY
+  RUNNING
+  PAUSED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum NotificationLevel {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+enum NotificationSource {
+  MANUAL
+  SYSTEM
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model ScheduledTask {
+  id             String          @id @default(cuid())
+  name           String
+  type           TaskType
+  payload        Json
+  cronExpression String?
+  runAt          DateTime?
+  status         TaskStatus      @default(READY)
+  attempts       Int             @default(0)
+  maxAttempts    Int             @default(3)
+  backoffMs      Int             @default(5000)
+  lastRunAt      DateTime?
+  nextRunAt      DateTime?
+  lastError      String?         @db.Text
+  lastResult     Json?
+  queueJobId     String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  executions     TaskExecution[]
+  certificate    Certificate?    @relation(fields: [certificateId], references: [id])
+  certificateId  String?
+
+  @@index([status, nextRunAt])
+  @@index([type, status])
+}
+
+model TaskExecution {
+  id         String        @id @default(cuid())
+  taskId     String
+  task       ScheduledTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  status     TaskStatus
+  attempt    Int
+  startedAt  DateTime
+  endedAt    DateTime?
+  durationMs Int?
+  result     Json?
+  error      String?       @db.Text
+  queueJobId String?
+  workerName String?
+  createdAt  DateTime      @default(now())
+
+  @@index([taskId, createdAt])
+  @@index([status, createdAt])
+}
+
+model Notification {
+  id        String             @id @default(cuid())
+  title     String
+  message   String             @db.Text
+  level     NotificationLevel  @default(INFO)
+  source    NotificationSource @default(SYSTEM)
+  status    NotificationStatus @default(PENDING)
+  channel   String             @default("IN_APP")
+  recipient String?
+  metadata  Json?
+  taskId    String?
+  scheduledAt DateTime?
+  sentAt    DateTime?
+  failedAt  DateTime?
+  lastError String?            @db.Text
+  isRead    Boolean            @default(false)
+  readAt    DateTime?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([status, scheduledAt])
+  @@index([taskId])
+  @@index([isRead, createdAt])
+  @@index([level, createdAt])
+}
+
+// ==================== 服务商管理 ====================
+
+model Provider {
+  id          String   @id @default(cuid())
+  name        String   // 配置名称，如"生产环境阿里云"
+  type        String   // 服务商类型代码：aliyun, qiniu, tencent, huawei, smtp 等
+  category    ProviderCategory // 分类
+
+  // 加密存储的凭证
+  credentials Json     // 动态凭证字段，根据 type 定义
+
+  // 扩展配置
+  config      Json?    // 额外配置参数
+
+  // 配置状态
+  isActive    Boolean  @default(true)
+  description String?
+
+  // 关联
+  dnsCertificates   Certificate[] @relation("DnsProvider")
+  deployCertificates Certificate[] @relation("DeployProvider")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type, isActive])
+  @@index([category])
+}
+
+enum ProviderCategory {
+  DNS     // DNS 服务商
+  CDN     // CDN 服务商
+  SMTP    // 邮件服务商
+  CLOUD   // 云服务商
+}
+
+// ==================== 证书管理 ====================
+
+model Certificate {
+  id          String   @id @default(cuid())
+  name        String   // 证书名称
+
+  // 域名配置
+  domain      String   // 主域名
+  wildcard    Boolean  @default(false) // 是否泛域名
+  sanDomains  Json?    // 附加域名 ["www.example.com"]
+
+  // DNS 验证配置（核心：选择 DNS 服务商进行验证）
+  dnsProviderId String  // DNS 服务商配置 ID（阿里云、腾讯云、华为云等）
+  dnsProvider   Provider @relation("DnsProvider", fields: [dnsProviderId], references: [id])
+
+  // 部署配置（可选：签发后部署到哪里）
+  deployTarget     String?   // 部署目标类型（aliyun_fc, qiniu, manual 等）
+  deployProviderId String?   // 部署目标服务商 ID（可选）
+  deployProvider   Provider? @relation("DeployProvider", fields: [deployProviderId], references: [id])
+  deployConfig     Json?     // 部署配置（服务名、域名等）
+
+  // 证书内容
+  certPem     String?  @db.LongText
+  keyPem      String?  @db.LongText
+  chainPem    String?  @db.LongText
+
+  // 状态
+  status      CertStatus @default(PENDING)
+  expiresAt   DateTime?
+  issuedAt    DateTime?
+
+  // 自动续期
+  autoRenew   Boolean  @default(true)
+  renewDays   Int      @default(30)
+
+  // 关联
+  tasks       ScheduledTask[]
+  logs        CertLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([domain, status])
+  @@index([expiresAt])
+  @@index([dnsProviderId])
+}
+
+enum CertStatus {
+  PENDING   // 待签发
+  ISSUING   // 签发中
+  ACTIVE    // 有效
+  EXPIRED   // 已过期
+  ERROR     // 错误
+}
+
+model CertLog {
+  id            String   @id @default(cuid())
+  certificateId String
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+
+  action        String   // issue, renew, deploy
+  status        String   // success, failed
+  message       String?  @db.Text
+  details       Json?    // 详细日志
+
+  createdAt     DateTime @default(now())
+
+  @@index([certificateId, createdAt])
+}
+
+// ==================== 健康检查 ====================
+
+model HealthCheck {
+  id          String   @id @default(cuid())
+  name        String   // 检查名称
+
+  // 检查目标
+  url         String   // 检测 URL
+  method      String   @default("GET") // HTTP 方法
+  headers     Json?    // 请求头
+  body        String?  // 请求体
+
+  // 检查规则
+  interval    Int      @default(300) // 检查间隔（秒）
+  timeout     Int      @default(10)  // 超时时间（秒）
+  retry       Int      @default(3)   // 重试次数
+
+  // 成功判定
+  expectStatus Int     @default(200) // 期望状态码
+  expectBody  String?  // 期望响应内容（可选）
+
+  // 告警配置
+  notifyEmail String?  // 告警邮箱
+
+  // 状态
+  isActive    Boolean  @default(true)
+  lastCheckAt DateTime?
+  lastStatus  String?  // UP, DOWN
+
+  // 关联
+  logs        HealthCheckLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, lastCheckAt])
+}
+
+model HealthCheckLog {
+  id            String   @id @default(cuid())
+  healthCheckId String
+  healthCheck   HealthCheck @relation(fields: [healthCheckId], references: [id], onDelete: Cascade)
+
+  status        String   // UP, DOWN
+  responseTime  Int?     // 响应时间（毫秒）
+  statusCode    Int?     // HTTP 状态码
+  error         String?  @db.Text
+
+  createdAt     DateTime @default(now())
+
+  @@index([healthCheckId, createdAt])
+  @@index([status, createdAt])
+}
+
+// ==================== 邮件配置 ====================
+
+model EmailConfig {
+  id          String   @id @default(cuid())
+  name        String   // 配置名称
+
+  // SMTP 配置
+  host        String   // SMTP 服务器地址
+  port        Int      // SMTP 端口
+  secure      Boolean  @default(true) // 是否使用 SSL
+  auth        Json     // { user: string, pass: string }
+
+  // 默认发件人
+  from        String   // 发件人地址
+  fromName    String?  // 发件人名称
+
+  // 状态
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model UserAccount {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("admin")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([username, isActive])
+}
+
+model ArtifactStorage {
+  id          String                @id @default(cuid())
+  name        String
+  type        DeploymentStorageType
+  bucket      String?
+  basePath    String?
+  endpoint    String?
+  credentials Json?
+  isActive    Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  projects    DeploymentProject[]
+
+  @@index([type, isActive])
+}
+
+model DeployTarget {
+  id          String               @id @default(cuid())
+  name        String
+  type        DeploymentTargetType
+  region      String?
+  serviceName String?
+  functionName String?
+  triggerUrl  String?
+  credentials Json?
+  isActive    Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  projects    DeploymentProject[]
+
+  @@index([type, isActive])
+}
+
+model DeploymentProject {
+  id              String             @id @default(cuid())
+  name            String
+  description     String?
+  storageId       String
+  storage         ArtifactStorage    @relation(fields: [storageId], references: [id], onDelete: Restrict)
+  targetId        String
+  target          DeployTarget       @relation(fields: [targetId], references: [id], onDelete: Restrict)
+  artifactPath    String?
+  deployPath      String             @default("")
+  startCommand    String             @default("")
+  servicePort     Int?
+  healthCheckPath String?
+  runtimeEnv      Json?
+  apiToken        String             @default("")
+  notifyOnSuccess Boolean            @default(false)
+  isActive        Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  records         DeploymentRecord[]
+
+  @@index([isActive, createdAt])
+  @@index([storageId])
+  @@index([targetId])
+}
+
+model DeploymentRecord {
+  id          String                 @id @default(cuid())
+  projectId   String
+  project     DeploymentProject      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  buildId     String?
+  commitSha   String?
+  refName     String?
+  artifactUri String
+  checksum    String?
+  status      DeploymentRecordStatus @default(PENDING)
+  triggeredBy String?
+  taskId      String?
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  error       String?                @db.Text
+  metadata    Json?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  stepLogs    DeploymentStepLog[]
+
+  @@unique([projectId, buildId])
+  @@index([projectId, createdAt])
+  @@index([status, createdAt])
+}
+
+model DeploymentStepLog {
+  id        String           @id @default(cuid())
+  recordId  String
+  record    DeploymentRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  stepOrder Int
+  stepName  String
+  status    String
+  message   String?          @db.Text
+  details   Json?
+  createdAt DateTime         @default(now())
+
+  @@index([recordId, stepOrder])
+}

@@ -1,0 +1,11 @@
+{
+  "name": "autoops-workspace",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.6.5",
+  "scripts": {
+    "dev:api": "pnpm --filter @autoops/server dev",
+    "build": "pnpm -r build:ts",
+    "test": "pnpm -r test"
+  }
+}
