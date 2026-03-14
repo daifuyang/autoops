@@ -46,6 +46,12 @@ export type DeploymentProjectMinAggregateOutputType = {
   servicePort: number | null
   healthCheckPath: string | null
   apiToken: string | null
+  certificateId: string | null
+  enableTlsAutoBind: boolean | null
+  nginxServerName: string | null
+  nginxConfigPath: string | null
+  nginxCertPath: string | null
+  nginxKeyPath: string | null
   notifyOnSuccess: boolean | null
   isActive: boolean | null
   createdAt: Date | null
@@ -64,6 +70,12 @@ export type DeploymentProjectMaxAggregateOutputType = {
   servicePort: number | null
   healthCheckPath: string | null
   apiToken: string | null
+  certificateId: string | null
+  enableTlsAutoBind: boolean | null
+  nginxServerName: string | null
+  nginxConfigPath: string | null
+  nginxCertPath: string | null
+  nginxKeyPath: string | null
   notifyOnSuccess: boolean | null
   isActive: boolean | null
   createdAt: Date | null
@@ -83,6 +95,12 @@ export type DeploymentProjectCountAggregateOutputType = {
   healthCheckPath: number
   runtimeEnv: number
   apiToken: number
+  certificateId: number
+  enableTlsAutoBind: number
+  nginxServerName: number
+  nginxConfigPath: number
+  nginxCertPath: number
+  nginxKeyPath: number
   notifyOnSuccess: number
   isActive: number
   createdAt: number
@@ -111,6 +129,12 @@ export type DeploymentProjectMinAggregateInputType = {
   servicePort?: true
   healthCheckPath?: true
   apiToken?: true
+  certificateId?: true
+  enableTlsAutoBind?: true
+  nginxServerName?: true
+  nginxConfigPath?: true
+  nginxCertPath?: true
+  nginxKeyPath?: true
   notifyOnSuccess?: true
   isActive?: true
   createdAt?: true
@@ -129,6 +153,12 @@ export type DeploymentProjectMaxAggregateInputType = {
   servicePort?: true
   healthCheckPath?: true
   apiToken?: true
+  certificateId?: true
+  enableTlsAutoBind?: true
+  nginxServerName?: true
+  nginxConfigPath?: true
+  nginxCertPath?: true
+  nginxKeyPath?: true
   notifyOnSuccess?: true
   isActive?: true
   createdAt?: true
@@ -148,6 +178,12 @@ export type DeploymentProjectCountAggregateInputType = {
   healthCheckPath?: true
   runtimeEnv?: true
   apiToken?: true
+  certificateId?: true
+  enableTlsAutoBind?: true
+  nginxServerName?: true
+  nginxConfigPath?: true
+  nginxCertPath?: true
+  nginxKeyPath?: true
   notifyOnSuccess?: true
   isActive?: true
   createdAt?: true
@@ -254,6 +290,12 @@ export type DeploymentProjectGroupByOutputType = {
   healthCheckPath: string | null
   runtimeEnv: runtime.JsonValue | null
   apiToken: string
+  certificateId: string | null
+  enableTlsAutoBind: boolean
+  nginxServerName: string | null
+  nginxConfigPath: string | null
+  nginxCertPath: string | null
+  nginxKeyPath: string | null
   notifyOnSuccess: boolean
   isActive: boolean
   createdAt: Date
@@ -296,12 +338,19 @@ export type DeploymentProjectWhereInput = {
   healthCheckPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
   runtimeEnv?: Prisma.JsonNullableFilter<"DeploymentProject">
   apiToken?: Prisma.StringFilter<"DeploymentProject"> | string
+  certificateId?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  enableTlsAutoBind?: Prisma.BoolFilter<"DeploymentProject"> | boolean
+  nginxServerName?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  nginxConfigPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  nginxCertPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  nginxKeyPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
   notifyOnSuccess?: Prisma.BoolFilter<"DeploymentProject"> | boolean
   isActive?: Prisma.BoolFilter<"DeploymentProject"> | boolean
   createdAt?: Prisma.DateTimeFilter<"DeploymentProject"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DeploymentProject"> | Date | string
   storage?: Prisma.XOR<Prisma.ArtifactStorageScalarRelationFilter, Prisma.ArtifactStorageWhereInput>
   target?: Prisma.XOR<Prisma.DeployTargetScalarRelationFilter, Prisma.DeployTargetWhereInput>
+  certificate?: Prisma.XOR<Prisma.CertificateNullableScalarRelationFilter, Prisma.CertificateWhereInput> | null
   records?: Prisma.DeploymentRecordListRelationFilter
 }
 
@@ -318,12 +367,19 @@ export type DeploymentProjectOrderByWithRelationInput = {
   healthCheckPath?: Prisma.SortOrderInput | Prisma.SortOrder
   runtimeEnv?: Prisma.SortOrderInput | Prisma.SortOrder
   apiToken?: Prisma.SortOrder
+  certificateId?: Prisma.SortOrderInput | Prisma.SortOrder
+  enableTlsAutoBind?: Prisma.SortOrder
+  nginxServerName?: Prisma.SortOrderInput | Prisma.SortOrder
+  nginxConfigPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  nginxCertPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  nginxKeyPath?: Prisma.SortOrderInput | Prisma.SortOrder
   notifyOnSuccess?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   storage?: Prisma.ArtifactStorageOrderByWithRelationInput
   target?: Prisma.DeployTargetOrderByWithRelationInput
+  certificate?: Prisma.CertificateOrderByWithRelationInput
   records?: Prisma.DeploymentRecordOrderByRelationAggregateInput
   _relevance?: Prisma.DeploymentProjectOrderByRelevanceInput
 }
@@ -344,12 +400,19 @@ export type DeploymentProjectWhereUniqueInput = Prisma.AtLeast<{
   healthCheckPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
   runtimeEnv?: Prisma.JsonNullableFilter<"DeploymentProject">
   apiToken?: Prisma.StringFilter<"DeploymentProject"> | string
+  certificateId?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  enableTlsAutoBind?: Prisma.BoolFilter<"DeploymentProject"> | boolean
+  nginxServerName?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  nginxConfigPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  nginxCertPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  nginxKeyPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
   notifyOnSuccess?: Prisma.BoolFilter<"DeploymentProject"> | boolean
   isActive?: Prisma.BoolFilter<"DeploymentProject"> | boolean
   createdAt?: Prisma.DateTimeFilter<"DeploymentProject"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DeploymentProject"> | Date | string
   storage?: Prisma.XOR<Prisma.ArtifactStorageScalarRelationFilter, Prisma.ArtifactStorageWhereInput>
   target?: Prisma.XOR<Prisma.DeployTargetScalarRelationFilter, Prisma.DeployTargetWhereInput>
+  certificate?: Prisma.XOR<Prisma.CertificateNullableScalarRelationFilter, Prisma.CertificateWhereInput> | null
   records?: Prisma.DeploymentRecordListRelationFilter
 }, "id">
 
@@ -366,6 +429,12 @@ export type DeploymentProjectOrderByWithAggregationInput = {
   healthCheckPath?: Prisma.SortOrderInput | Prisma.SortOrder
   runtimeEnv?: Prisma.SortOrderInput | Prisma.SortOrder
   apiToken?: Prisma.SortOrder
+  certificateId?: Prisma.SortOrderInput | Prisma.SortOrder
+  enableTlsAutoBind?: Prisma.SortOrder
+  nginxServerName?: Prisma.SortOrderInput | Prisma.SortOrder
+  nginxConfigPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  nginxCertPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  nginxKeyPath?: Prisma.SortOrderInput | Prisma.SortOrder
   notifyOnSuccess?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -393,6 +462,12 @@ export type DeploymentProjectScalarWhereWithAggregatesInput = {
   healthCheckPath?: Prisma.StringNullableWithAggregatesFilter<"DeploymentProject"> | string | null
   runtimeEnv?: Prisma.JsonNullableWithAggregatesFilter<"DeploymentProject">
   apiToken?: Prisma.StringWithAggregatesFilter<"DeploymentProject"> | string
+  certificateId?: Prisma.StringNullableWithAggregatesFilter<"DeploymentProject"> | string | null
+  enableTlsAutoBind?: Prisma.BoolWithAggregatesFilter<"DeploymentProject"> | boolean
+  nginxServerName?: Prisma.StringNullableWithAggregatesFilter<"DeploymentProject"> | string | null
+  nginxConfigPath?: Prisma.StringNullableWithAggregatesFilter<"DeploymentProject"> | string | null
+  nginxCertPath?: Prisma.StringNullableWithAggregatesFilter<"DeploymentProject"> | string | null
+  nginxKeyPath?: Prisma.StringNullableWithAggregatesFilter<"DeploymentProject"> | string | null
   notifyOnSuccess?: Prisma.BoolWithAggregatesFilter<"DeploymentProject"> | boolean
   isActive?: Prisma.BoolWithAggregatesFilter<"DeploymentProject"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"DeploymentProject"> | Date | string
@@ -410,12 +485,18 @@ export type DeploymentProjectCreateInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   storage: Prisma.ArtifactStorageCreateNestedOneWithoutProjectsInput
   target: Prisma.DeployTargetCreateNestedOneWithoutProjectsInput
+  certificate?: Prisma.CertificateCreateNestedOneWithoutDeploymentProjectsInput
   records?: Prisma.DeploymentRecordCreateNestedManyWithoutProjectInput
 }
 
@@ -432,6 +513,12 @@ export type DeploymentProjectUncheckedCreateInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  certificateId?: string | null
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
@@ -450,12 +537,18 @@ export type DeploymentProjectUpdateInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   storage?: Prisma.ArtifactStorageUpdateOneRequiredWithoutProjectsNestedInput
   target?: Prisma.DeployTargetUpdateOneRequiredWithoutProjectsNestedInput
+  certificate?: Prisma.CertificateUpdateOneWithoutDeploymentProjectsNestedInput
   records?: Prisma.DeploymentRecordUpdateManyWithoutProjectNestedInput
 }
 
@@ -472,6 +565,12 @@ export type DeploymentProjectUncheckedUpdateInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  certificateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -492,6 +591,12 @@ export type DeploymentProjectCreateManyInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  certificateId?: string | null
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
@@ -509,6 +614,11 @@ export type DeploymentProjectUpdateManyMutationInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -528,6 +638,12 @@ export type DeploymentProjectUncheckedUpdateManyInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  certificateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -563,6 +679,12 @@ export type DeploymentProjectCountOrderByAggregateInput = {
   healthCheckPath?: Prisma.SortOrder
   runtimeEnv?: Prisma.SortOrder
   apiToken?: Prisma.SortOrder
+  certificateId?: Prisma.SortOrder
+  enableTlsAutoBind?: Prisma.SortOrder
+  nginxServerName?: Prisma.SortOrder
+  nginxConfigPath?: Prisma.SortOrder
+  nginxCertPath?: Prisma.SortOrder
+  nginxKeyPath?: Prisma.SortOrder
   notifyOnSuccess?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -585,6 +707,12 @@ export type DeploymentProjectMaxOrderByAggregateInput = {
   servicePort?: Prisma.SortOrder
   healthCheckPath?: Prisma.SortOrder
   apiToken?: Prisma.SortOrder
+  certificateId?: Prisma.SortOrder
+  enableTlsAutoBind?: Prisma.SortOrder
+  nginxServerName?: Prisma.SortOrder
+  nginxConfigPath?: Prisma.SortOrder
+  nginxCertPath?: Prisma.SortOrder
+  nginxKeyPath?: Prisma.SortOrder
   notifyOnSuccess?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -603,6 +731,12 @@ export type DeploymentProjectMinOrderByAggregateInput = {
   servicePort?: Prisma.SortOrder
   healthCheckPath?: Prisma.SortOrder
   apiToken?: Prisma.SortOrder
+  certificateId?: Prisma.SortOrder
+  enableTlsAutoBind?: Prisma.SortOrder
+  nginxServerName?: Prisma.SortOrder
+  nginxConfigPath?: Prisma.SortOrder
+  nginxCertPath?: Prisma.SortOrder
+  nginxKeyPath?: Prisma.SortOrder
   notifyOnSuccess?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -616,6 +750,48 @@ export type DeploymentProjectSumOrderByAggregateInput = {
 export type DeploymentProjectScalarRelationFilter = {
   is?: Prisma.DeploymentProjectWhereInput
   isNot?: Prisma.DeploymentProjectWhereInput
+}
+
+export type DeploymentProjectCreateNestedManyWithoutCertificateInput = {
+  create?: Prisma.XOR<Prisma.DeploymentProjectCreateWithoutCertificateInput, Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput> | Prisma.DeploymentProjectCreateWithoutCertificateInput[] | Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.DeploymentProjectCreateOrConnectWithoutCertificateInput | Prisma.DeploymentProjectCreateOrConnectWithoutCertificateInput[]
+  createMany?: Prisma.DeploymentProjectCreateManyCertificateInputEnvelope
+  connect?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+}
+
+export type DeploymentProjectUncheckedCreateNestedManyWithoutCertificateInput = {
+  create?: Prisma.XOR<Prisma.DeploymentProjectCreateWithoutCertificateInput, Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput> | Prisma.DeploymentProjectCreateWithoutCertificateInput[] | Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.DeploymentProjectCreateOrConnectWithoutCertificateInput | Prisma.DeploymentProjectCreateOrConnectWithoutCertificateInput[]
+  createMany?: Prisma.DeploymentProjectCreateManyCertificateInputEnvelope
+  connect?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+}
+
+export type DeploymentProjectUpdateManyWithoutCertificateNestedInput = {
+  create?: Prisma.XOR<Prisma.DeploymentProjectCreateWithoutCertificateInput, Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput> | Prisma.DeploymentProjectCreateWithoutCertificateInput[] | Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.DeploymentProjectCreateOrConnectWithoutCertificateInput | Prisma.DeploymentProjectCreateOrConnectWithoutCertificateInput[]
+  upsert?: Prisma.DeploymentProjectUpsertWithWhereUniqueWithoutCertificateInput | Prisma.DeploymentProjectUpsertWithWhereUniqueWithoutCertificateInput[]
+  createMany?: Prisma.DeploymentProjectCreateManyCertificateInputEnvelope
+  set?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+  disconnect?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+  delete?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+  connect?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+  update?: Prisma.DeploymentProjectUpdateWithWhereUniqueWithoutCertificateInput | Prisma.DeploymentProjectUpdateWithWhereUniqueWithoutCertificateInput[]
+  updateMany?: Prisma.DeploymentProjectUpdateManyWithWhereWithoutCertificateInput | Prisma.DeploymentProjectUpdateManyWithWhereWithoutCertificateInput[]
+  deleteMany?: Prisma.DeploymentProjectScalarWhereInput | Prisma.DeploymentProjectScalarWhereInput[]
+}
+
+export type DeploymentProjectUncheckedUpdateManyWithoutCertificateNestedInput = {
+  create?: Prisma.XOR<Prisma.DeploymentProjectCreateWithoutCertificateInput, Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput> | Prisma.DeploymentProjectCreateWithoutCertificateInput[] | Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.DeploymentProjectCreateOrConnectWithoutCertificateInput | Prisma.DeploymentProjectCreateOrConnectWithoutCertificateInput[]
+  upsert?: Prisma.DeploymentProjectUpsertWithWhereUniqueWithoutCertificateInput | Prisma.DeploymentProjectUpsertWithWhereUniqueWithoutCertificateInput[]
+  createMany?: Prisma.DeploymentProjectCreateManyCertificateInputEnvelope
+  set?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+  disconnect?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+  delete?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+  connect?: Prisma.DeploymentProjectWhereUniqueInput | Prisma.DeploymentProjectWhereUniqueInput[]
+  update?: Prisma.DeploymentProjectUpdateWithWhereUniqueWithoutCertificateInput | Prisma.DeploymentProjectUpdateWithWhereUniqueWithoutCertificateInput[]
+  updateMany?: Prisma.DeploymentProjectUpdateManyWithWhereWithoutCertificateInput | Prisma.DeploymentProjectUpdateManyWithWhereWithoutCertificateInput[]
+  deleteMany?: Prisma.DeploymentProjectScalarWhereInput | Prisma.DeploymentProjectScalarWhereInput[]
 }
 
 export type DeploymentProjectCreateNestedManyWithoutStorageInput = {
@@ -716,6 +892,110 @@ export type DeploymentProjectUpdateOneRequiredWithoutRecordsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DeploymentProjectUpdateToOneWithWhereWithoutRecordsInput, Prisma.DeploymentProjectUpdateWithoutRecordsInput>, Prisma.DeploymentProjectUncheckedUpdateWithoutRecordsInput>
 }
 
+export type DeploymentProjectCreateWithoutCertificateInput = {
+  id?: string
+  name: string
+  description?: string | null
+  artifactPath?: string | null
+  deployPath?: string
+  startCommand?: string
+  servicePort?: number | null
+  healthCheckPath?: string | null
+  runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  apiToken?: string
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
+  notifyOnSuccess?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  storage: Prisma.ArtifactStorageCreateNestedOneWithoutProjectsInput
+  target: Prisma.DeployTargetCreateNestedOneWithoutProjectsInput
+  records?: Prisma.DeploymentRecordCreateNestedManyWithoutProjectInput
+}
+
+export type DeploymentProjectUncheckedCreateWithoutCertificateInput = {
+  id?: string
+  name: string
+  description?: string | null
+  storageId: string
+  targetId: string
+  artifactPath?: string | null
+  deployPath?: string
+  startCommand?: string
+  servicePort?: number | null
+  healthCheckPath?: string | null
+  runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  apiToken?: string
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
+  notifyOnSuccess?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  records?: Prisma.DeploymentRecordUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type DeploymentProjectCreateOrConnectWithoutCertificateInput = {
+  where: Prisma.DeploymentProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DeploymentProjectCreateWithoutCertificateInput, Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput>
+}
+
+export type DeploymentProjectCreateManyCertificateInputEnvelope = {
+  data: Prisma.DeploymentProjectCreateManyCertificateInput | Prisma.DeploymentProjectCreateManyCertificateInput[]
+  skipDuplicates?: boolean
+}
+
+export type DeploymentProjectUpsertWithWhereUniqueWithoutCertificateInput = {
+  where: Prisma.DeploymentProjectWhereUniqueInput
+  update: Prisma.XOR<Prisma.DeploymentProjectUpdateWithoutCertificateInput, Prisma.DeploymentProjectUncheckedUpdateWithoutCertificateInput>
+  create: Prisma.XOR<Prisma.DeploymentProjectCreateWithoutCertificateInput, Prisma.DeploymentProjectUncheckedCreateWithoutCertificateInput>
+}
+
+export type DeploymentProjectUpdateWithWhereUniqueWithoutCertificateInput = {
+  where: Prisma.DeploymentProjectWhereUniqueInput
+  data: Prisma.XOR<Prisma.DeploymentProjectUpdateWithoutCertificateInput, Prisma.DeploymentProjectUncheckedUpdateWithoutCertificateInput>
+}
+
+export type DeploymentProjectUpdateManyWithWhereWithoutCertificateInput = {
+  where: Prisma.DeploymentProjectScalarWhereInput
+  data: Prisma.XOR<Prisma.DeploymentProjectUpdateManyMutationInput, Prisma.DeploymentProjectUncheckedUpdateManyWithoutCertificateInput>
+}
+
+export type DeploymentProjectScalarWhereInput = {
+  AND?: Prisma.DeploymentProjectScalarWhereInput | Prisma.DeploymentProjectScalarWhereInput[]
+  OR?: Prisma.DeploymentProjectScalarWhereInput[]
+  NOT?: Prisma.DeploymentProjectScalarWhereInput | Prisma.DeploymentProjectScalarWhereInput[]
+  id?: Prisma.StringFilter<"DeploymentProject"> | string
+  name?: Prisma.StringFilter<"DeploymentProject"> | string
+  description?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  storageId?: Prisma.StringFilter<"DeploymentProject"> | string
+  targetId?: Prisma.StringFilter<"DeploymentProject"> | string
+  artifactPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  deployPath?: Prisma.StringFilter<"DeploymentProject"> | string
+  startCommand?: Prisma.StringFilter<"DeploymentProject"> | string
+  servicePort?: Prisma.IntNullableFilter<"DeploymentProject"> | number | null
+  healthCheckPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  runtimeEnv?: Prisma.JsonNullableFilter<"DeploymentProject">
+  apiToken?: Prisma.StringFilter<"DeploymentProject"> | string
+  certificateId?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  enableTlsAutoBind?: Prisma.BoolFilter<"DeploymentProject"> | boolean
+  nginxServerName?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  nginxConfigPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  nginxCertPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  nginxKeyPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
+  notifyOnSuccess?: Prisma.BoolFilter<"DeploymentProject"> | boolean
+  isActive?: Prisma.BoolFilter<"DeploymentProject"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"DeploymentProject"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"DeploymentProject"> | Date | string
+}
+
 export type DeploymentProjectCreateWithoutStorageInput = {
   id?: string
   name: string
@@ -727,11 +1007,17 @@ export type DeploymentProjectCreateWithoutStorageInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   target: Prisma.DeployTargetCreateNestedOneWithoutProjectsInput
+  certificate?: Prisma.CertificateCreateNestedOneWithoutDeploymentProjectsInput
   records?: Prisma.DeploymentRecordCreateNestedManyWithoutProjectInput
 }
 
@@ -747,6 +1033,12 @@ export type DeploymentProjectUncheckedCreateWithoutStorageInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  certificateId?: string | null
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
@@ -780,28 +1072,6 @@ export type DeploymentProjectUpdateManyWithWhereWithoutStorageInput = {
   data: Prisma.XOR<Prisma.DeploymentProjectUpdateManyMutationInput, Prisma.DeploymentProjectUncheckedUpdateManyWithoutStorageInput>
 }
 
-export type DeploymentProjectScalarWhereInput = {
-  AND?: Prisma.DeploymentProjectScalarWhereInput | Prisma.DeploymentProjectScalarWhereInput[]
-  OR?: Prisma.DeploymentProjectScalarWhereInput[]
-  NOT?: Prisma.DeploymentProjectScalarWhereInput | Prisma.DeploymentProjectScalarWhereInput[]
-  id?: Prisma.StringFilter<"DeploymentProject"> | string
-  name?: Prisma.StringFilter<"DeploymentProject"> | string
-  description?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
-  storageId?: Prisma.StringFilter<"DeploymentProject"> | string
-  targetId?: Prisma.StringFilter<"DeploymentProject"> | string
-  artifactPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
-  deployPath?: Prisma.StringFilter<"DeploymentProject"> | string
-  startCommand?: Prisma.StringFilter<"DeploymentProject"> | string
-  servicePort?: Prisma.IntNullableFilter<"DeploymentProject"> | number | null
-  healthCheckPath?: Prisma.StringNullableFilter<"DeploymentProject"> | string | null
-  runtimeEnv?: Prisma.JsonNullableFilter<"DeploymentProject">
-  apiToken?: Prisma.StringFilter<"DeploymentProject"> | string
-  notifyOnSuccess?: Prisma.BoolFilter<"DeploymentProject"> | boolean
-  isActive?: Prisma.BoolFilter<"DeploymentProject"> | boolean
-  createdAt?: Prisma.DateTimeFilter<"DeploymentProject"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"DeploymentProject"> | Date | string
-}
-
 export type DeploymentProjectCreateWithoutTargetInput = {
   id?: string
   name: string
@@ -813,11 +1083,17 @@ export type DeploymentProjectCreateWithoutTargetInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   storage: Prisma.ArtifactStorageCreateNestedOneWithoutProjectsInput
+  certificate?: Prisma.CertificateCreateNestedOneWithoutDeploymentProjectsInput
   records?: Prisma.DeploymentRecordCreateNestedManyWithoutProjectInput
 }
 
@@ -833,6 +1109,12 @@ export type DeploymentProjectUncheckedCreateWithoutTargetInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  certificateId?: string | null
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
@@ -877,12 +1159,18 @@ export type DeploymentProjectCreateWithoutRecordsInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   storage: Prisma.ArtifactStorageCreateNestedOneWithoutProjectsInput
   target: Prisma.DeployTargetCreateNestedOneWithoutProjectsInput
+  certificate?: Prisma.CertificateCreateNestedOneWithoutDeploymentProjectsInput
 }
 
 export type DeploymentProjectUncheckedCreateWithoutRecordsInput = {
@@ -898,6 +1186,12 @@ export type DeploymentProjectUncheckedCreateWithoutRecordsInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  certificateId?: string | null
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
@@ -931,12 +1225,18 @@ export type DeploymentProjectUpdateWithoutRecordsInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   storage?: Prisma.ArtifactStorageUpdateOneRequiredWithoutProjectsNestedInput
   target?: Prisma.DeployTargetUpdateOneRequiredWithoutProjectsNestedInput
+  certificate?: Prisma.CertificateUpdateOneWithoutDeploymentProjectsNestedInput
 }
 
 export type DeploymentProjectUncheckedUpdateWithoutRecordsInput = {
@@ -952,6 +1252,110 @@ export type DeploymentProjectUncheckedUpdateWithoutRecordsInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  certificateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DeploymentProjectCreateManyCertificateInput = {
+  id?: string
+  name: string
+  description?: string | null
+  storageId: string
+  targetId: string
+  artifactPath?: string | null
+  deployPath?: string
+  startCommand?: string
+  servicePort?: number | null
+  healthCheckPath?: string | null
+  runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  apiToken?: string
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
+  notifyOnSuccess?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DeploymentProjectUpdateWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deployPath?: Prisma.StringFieldUpdateOperationsInput | string
+  startCommand?: Prisma.StringFieldUpdateOperationsInput | string
+  servicePort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  storage?: Prisma.ArtifactStorageUpdateOneRequiredWithoutProjectsNestedInput
+  target?: Prisma.DeployTargetUpdateOneRequiredWithoutProjectsNestedInput
+  records?: Prisma.DeploymentRecordUpdateManyWithoutProjectNestedInput
+}
+
+export type DeploymentProjectUncheckedUpdateWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageId?: Prisma.StringFieldUpdateOperationsInput | string
+  targetId?: Prisma.StringFieldUpdateOperationsInput | string
+  artifactPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deployPath?: Prisma.StringFieldUpdateOperationsInput | string
+  startCommand?: Prisma.StringFieldUpdateOperationsInput | string
+  servicePort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  records?: Prisma.DeploymentRecordUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type DeploymentProjectUncheckedUpdateManyWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageId?: Prisma.StringFieldUpdateOperationsInput | string
+  targetId?: Prisma.StringFieldUpdateOperationsInput | string
+  artifactPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deployPath?: Prisma.StringFieldUpdateOperationsInput | string
+  startCommand?: Prisma.StringFieldUpdateOperationsInput | string
+  servicePort?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -970,6 +1374,12 @@ export type DeploymentProjectCreateManyStorageInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  certificateId?: string | null
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
@@ -987,11 +1397,17 @@ export type DeploymentProjectUpdateWithoutStorageInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   target?: Prisma.DeployTargetUpdateOneRequiredWithoutProjectsNestedInput
+  certificate?: Prisma.CertificateUpdateOneWithoutDeploymentProjectsNestedInput
   records?: Prisma.DeploymentRecordUpdateManyWithoutProjectNestedInput
 }
 
@@ -1007,6 +1423,12 @@ export type DeploymentProjectUncheckedUpdateWithoutStorageInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  certificateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1026,6 +1448,12 @@ export type DeploymentProjectUncheckedUpdateManyWithoutStorageInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  certificateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1044,6 +1472,12 @@ export type DeploymentProjectCreateManyTargetInput = {
   healthCheckPath?: string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: string
+  certificateId?: string | null
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: Date | string
@@ -1061,11 +1495,17 @@ export type DeploymentProjectUpdateWithoutTargetInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   storage?: Prisma.ArtifactStorageUpdateOneRequiredWithoutProjectsNestedInput
+  certificate?: Prisma.CertificateUpdateOneWithoutDeploymentProjectsNestedInput
   records?: Prisma.DeploymentRecordUpdateManyWithoutProjectNestedInput
 }
 
@@ -1081,6 +1521,12 @@ export type DeploymentProjectUncheckedUpdateWithoutTargetInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  certificateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1100,6 +1546,12 @@ export type DeploymentProjectUncheckedUpdateManyWithoutTargetInput = {
   healthCheckPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   runtimeEnv?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   apiToken?: Prisma.StringFieldUpdateOperationsInput | string
+  certificateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enableTlsAutoBind?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  nginxServerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxConfigPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxCertPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nginxKeyPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notifyOnSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1150,12 +1602,19 @@ export type DeploymentProjectSelect<ExtArgs extends runtime.Types.Extensions.Int
   healthCheckPath?: boolean
   runtimeEnv?: boolean
   apiToken?: boolean
+  certificateId?: boolean
+  enableTlsAutoBind?: boolean
+  nginxServerName?: boolean
+  nginxConfigPath?: boolean
+  nginxCertPath?: boolean
+  nginxKeyPath?: boolean
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   storage?: boolean | Prisma.ArtifactStorageDefaultArgs<ExtArgs>
   target?: boolean | Prisma.DeployTargetDefaultArgs<ExtArgs>
+  certificate?: boolean | Prisma.DeploymentProject$certificateArgs<ExtArgs>
   records?: boolean | Prisma.DeploymentProject$recordsArgs<ExtArgs>
   _count?: boolean | Prisma.DeploymentProjectCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deploymentProject"]>
@@ -1175,16 +1634,23 @@ export type DeploymentProjectSelectScalar = {
   healthCheckPath?: boolean
   runtimeEnv?: boolean
   apiToken?: boolean
+  certificateId?: boolean
+  enableTlsAutoBind?: boolean
+  nginxServerName?: boolean
+  nginxConfigPath?: boolean
+  nginxCertPath?: boolean
+  nginxKeyPath?: boolean
   notifyOnSuccess?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DeploymentProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "storageId" | "targetId" | "artifactPath" | "deployPath" | "startCommand" | "servicePort" | "healthCheckPath" | "runtimeEnv" | "apiToken" | "notifyOnSuccess" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["deploymentProject"]>
+export type DeploymentProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "storageId" | "targetId" | "artifactPath" | "deployPath" | "startCommand" | "servicePort" | "healthCheckPath" | "runtimeEnv" | "apiToken" | "certificateId" | "enableTlsAutoBind" | "nginxServerName" | "nginxConfigPath" | "nginxCertPath" | "nginxKeyPath" | "notifyOnSuccess" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["deploymentProject"]>
 export type DeploymentProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   storage?: boolean | Prisma.ArtifactStorageDefaultArgs<ExtArgs>
   target?: boolean | Prisma.DeployTargetDefaultArgs<ExtArgs>
+  certificate?: boolean | Prisma.DeploymentProject$certificateArgs<ExtArgs>
   records?: boolean | Prisma.DeploymentProject$recordsArgs<ExtArgs>
   _count?: boolean | Prisma.DeploymentProjectCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1194,6 +1660,7 @@ export type $DeploymentProjectPayload<ExtArgs extends runtime.Types.Extensions.I
   objects: {
     storage: Prisma.$ArtifactStoragePayload<ExtArgs>
     target: Prisma.$DeployTargetPayload<ExtArgs>
+    certificate: Prisma.$CertificatePayload<ExtArgs> | null
     records: Prisma.$DeploymentRecordPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1209,6 +1676,12 @@ export type $DeploymentProjectPayload<ExtArgs extends runtime.Types.Extensions.I
     healthCheckPath: string | null
     runtimeEnv: runtime.JsonValue | null
     apiToken: string
+    certificateId: string | null
+    enableTlsAutoBind: boolean
+    nginxServerName: string | null
+    nginxConfigPath: string | null
+    nginxCertPath: string | null
+    nginxKeyPath: string | null
     notifyOnSuccess: boolean
     isActive: boolean
     createdAt: Date
@@ -1555,6 +2028,7 @@ export interface Prisma__DeploymentProjectClient<T, Null = never, ExtArgs extend
   readonly [Symbol.toStringTag]: "PrismaPromise"
   storage<T extends Prisma.ArtifactStorageDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ArtifactStorageDefaultArgs<ExtArgs>>): Prisma.Prisma__ArtifactStorageClient<runtime.Types.Result.GetResult<Prisma.$ArtifactStoragePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   target<T extends Prisma.DeployTargetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeployTargetDefaultArgs<ExtArgs>>): Prisma.Prisma__DeployTargetClient<runtime.Types.Result.GetResult<Prisma.$DeployTargetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  certificate<T extends Prisma.DeploymentProject$certificateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeploymentProject$certificateArgs<ExtArgs>>): Prisma.Prisma__CertificateClient<runtime.Types.Result.GetResult<Prisma.$CertificatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   records<T extends Prisma.DeploymentProject$recordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeploymentProject$recordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DeploymentRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1597,6 +2071,12 @@ export interface DeploymentProjectFieldRefs {
   readonly healthCheckPath: Prisma.FieldRef<"DeploymentProject", 'String'>
   readonly runtimeEnv: Prisma.FieldRef<"DeploymentProject", 'Json'>
   readonly apiToken: Prisma.FieldRef<"DeploymentProject", 'String'>
+  readonly certificateId: Prisma.FieldRef<"DeploymentProject", 'String'>
+  readonly enableTlsAutoBind: Prisma.FieldRef<"DeploymentProject", 'Boolean'>
+  readonly nginxServerName: Prisma.FieldRef<"DeploymentProject", 'String'>
+  readonly nginxConfigPath: Prisma.FieldRef<"DeploymentProject", 'String'>
+  readonly nginxCertPath: Prisma.FieldRef<"DeploymentProject", 'String'>
+  readonly nginxKeyPath: Prisma.FieldRef<"DeploymentProject", 'String'>
   readonly notifyOnSuccess: Prisma.FieldRef<"DeploymentProject", 'Boolean'>
   readonly isActive: Prisma.FieldRef<"DeploymentProject", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"DeploymentProject", 'DateTime'>
@@ -1941,6 +2421,25 @@ export type DeploymentProjectDeleteManyArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many DeploymentProjects to delete.
    */
   limit?: number
+}
+
+/**
+ * DeploymentProject.certificate
+ */
+export type DeploymentProject$certificateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Certificate
+   */
+  select?: Prisma.CertificateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Certificate
+   */
+  omit?: Prisma.CertificateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
+  where?: Prisma.CertificateWhereInput
 }
 
 /**

@@ -36,9 +36,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Bell, Plus } from "lucide-react";
 import { getApi } from "@/generated/api";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type NotificationItem = {
   id: string;
@@ -64,6 +75,9 @@ export default function NotificationsPage() {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -78,25 +92,51 @@ export default function NotificationsPage() {
     recipient: "",
   });
 
-  const fetchItems = useCallback(async () => {
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+  const pageItems = useMemo(() => {
+    const pages: Array<number | "left-ellipsis" | "right-ellipsis"> = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      return pages;
+    }
+    pages.push(1);
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+    if (start > 2) pages.push("left-ellipsis");
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < totalPages - 1) pages.push("right-ellipsis");
+    pages.push(totalPages);
+    return pages;
+  }, [currentPage, totalPages]);
+
+  const fetchItems = useCallback(async (page = currentPage, size = pageSize) => {
     setIsLoading(true);
     setError("");
     try {
-      const response = await api.listNotifications({ page: 1, pageSize: 50 });
+      const response = await api.listNotifications({ page, pageSize: size });
       const data = response.data?.data;
       const list = Array.isArray(data) ? data : data?.items || [];
       setItems(list as NotificationItem[]);
+      if (Array.isArray(data)) {
+        setCurrentPage(page);
+        setPageSize(size);
+        setTotal(list.length);
+      } else {
+        setCurrentPage(Number(data?.page) || page);
+        setPageSize(Number(data?.pageSize) || size);
+        setTotal(Number(data?.total) || 0);
+      }
     } catch {
       setItems([]);
       setError("获取通知列表失败");
     } finally {
       setIsLoading(false);
     }
-  }, [api]);
+  }, [api, currentPage, pageSize]);
 
   useEffect(() => {
     fetchItems();
-  }, [fetchItems]);
+  }, [fetchItems, currentPage, pageSize]);
 
   const unreadCount = useMemo(() => items.filter((item) => !item.isRead).length, [items]);
 
@@ -132,7 +172,11 @@ export default function NotificationsPage() {
           scheduledAt: "",
           recipient: "",
         });
-        fetchItems();
+        if (currentPage !== 1) {
+          setCurrentPage(1);
+        } else {
+          fetchItems(1, pageSize);
+        }
       } else {
         toast.error(response.data?.msg || "创建失败");
       }
@@ -150,7 +194,7 @@ export default function NotificationsPage() {
       const response = await api.markNotificationRead({ id: item.id });
       if (response.data?.success) {
         toast.success("已标记为已读");
-        fetchItems();
+        fetchItems(currentPage, pageSize);
       } else {
         toast.error(response.data?.msg || "标记失败");
       }
@@ -175,7 +219,11 @@ export default function NotificationsPage() {
         toast.success("通知已删除");
         setIsDeleteDialogOpen(false);
         setSelectedItem(null);
-        fetchItems();
+        if (items.length === 1 && currentPage > 1) {
+          setCurrentPage((prev) => Math.max(prev - 1, 1));
+        } else {
+          fetchItems(currentPage, pageSize);
+        }
       } else {
         toast.error(response.data?.msg || "删除失败");
       }
@@ -305,7 +353,7 @@ export default function NotificationsPage() {
             <Bell className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{items.length}</div>
+            <div className="text-2xl font-bold">{total}</div>
           </CardContent>
         </Card>
         <Card>
@@ -330,63 +378,173 @@ export default function NotificationsPage() {
           ) : error ? (
             <div className="py-8 text-center text-destructive">{error}</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>标题</TableHead>
-                  <TableHead>级别</TableHead>
-                  <TableHead>来源</TableHead>
-                  <TableHead>发送状态</TableHead>
-                  <TableHead>发送方式</TableHead>
-                  <TableHead>时间</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <div className="font-medium">{item.title}</div>
-                      <div className="text-xs text-muted-foreground">{item.message}</div>
-                    </TableCell>
-                    <TableCell>{levelBadge(item.level)}</TableCell>
-                    <TableCell>{item.source === "MANUAL" ? "手动" : "系统"}</TableCell>
-                    <TableCell>{statusBadge(item.status)}</TableCell>
-                    <TableCell>{item.scheduledAt ? "定时" : "异步"}</TableCell>
-                    <TableCell>
-                      {item.sentAt
-                        ? new Date(item.sentAt).toLocaleString()
-                        : item.scheduledAt
-                          ? new Date(item.scheduledAt).toLocaleString()
-                          : new Date(item.createdAt).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleRead(item)}
-                          disabled={item.isRead || actionLoadingKey === `read-${item.id}`}
-                        >
-                          标记已读
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleOpenDelete(item)}
-                          disabled={actionLoadingKey === `delete-${item.id}`}
-                        >
-                          删除
-                        </Button>
-                      </div>
-                      {item.status === "FAILED" && item.lastError ? (
-                        <div className="mt-1 text-right text-xs text-destructive">{item.lastError}</div>
-                      ) : null}
-                    </TableCell>
+            <div className="space-y-4 overflow-hidden">
+              <div className="w-full overflow-x-auto">
+                <TooltipProvider>
+                <Table className="min-w-[960px] table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>标题</TableHead>
+                    <TableHead>级别</TableHead>
+                    <TableHead>来源</TableHead>
+                    <TableHead>发送状态</TableHead>
+                    <TableHead>发送方式</TableHead>
+                    <TableHead>时间</TableHead>
+                    <TableHead className="text-right">操作</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {items.length > 0 ? items.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="max-w-[360px] align-top">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-default font-medium [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-all">
+                              {item.title}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-[420px] break-all whitespace-pre-wrap" side="top" align="start">
+                            {item.title}
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="mt-0.5 cursor-default text-xs text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-all">
+                              {item.message}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-[420px] break-all whitespace-pre-wrap" side="top" align="start">
+                            {item.message}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>{levelBadge(item.level)}</TableCell>
+                      <TableCell>{item.source === "MANUAL" ? "手动" : "系统"}</TableCell>
+                      <TableCell>{statusBadge(item.status)}</TableCell>
+                      <TableCell>{item.scheduledAt ? "定时" : "异步"}</TableCell>
+                      <TableCell>
+                        {item.sentAt
+                          ? new Date(item.sentAt).toLocaleString()
+                          : item.scheduledAt
+                            ? new Date(item.scheduledAt).toLocaleString()
+                            : new Date(item.createdAt).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right align-top">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRead(item)}
+                            disabled={item.isRead || actionLoadingKey === `read-${item.id}`}
+                          >
+                            标记已读
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleOpenDelete(item)}
+                            disabled={actionLoadingKey === `delete-${item.id}`}
+                          >
+                            删除
+                          </Button>
+                        </div>
+                        {item.status === "FAILED" && item.lastError ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="mt-1 cursor-default text-right text-xs text-destructive [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-all">
+                                {item.lastError}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[420px] break-all whitespace-pre-wrap" side="top" align="end">
+                              {item.lastError}
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : null}
+                      </TableCell>
+                    </TableRow>
+                  )) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                        暂无通知数据
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+                </Table>
+                </TooltipProvider>
+              </div>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="text-sm text-muted-foreground">
+                  第 {currentPage} / {totalPages} 页，共 {total} 条
+                </div>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={String(pageSize)}
+                    onValueChange={(value) => {
+                      setCurrentPage(1);
+                      setPageSize(Number(value));
+                    }}
+                  >
+                    <SelectTrigger className="w-[110px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10 / 页</SelectItem>
+                      <SelectItem value="20">20 / 页</SelectItem>
+                      <SelectItem value="50">50 / 页</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Pagination className="mx-0 w-auto justify-end">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          className={cn((currentPage <= 1 || isLoading) && "pointer-events-none opacity-50")}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage > 1 && !isLoading) {
+                              setCurrentPage((prev) => Math.max(prev - 1, 1));
+                            }
+                          }}
+                        />
+                      </PaginationItem>
+                      {pageItems.map((item, index) => (
+                        <PaginationItem key={`${item}-${index}`}>
+                          {typeof item === "number" ? (
+                            <PaginationLink
+                              href="#"
+                              isActive={item === currentPage}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (!isLoading && item !== currentPage) {
+                                  setCurrentPage(item);
+                                }
+                              }}
+                            >
+                              {item}
+                            </PaginationLink>
+                          ) : (
+                            <PaginationEllipsis />
+                          )}
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          className={cn((currentPage >= totalPages || isLoading) && "pointer-events-none opacity-50")}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage < totalPages && !isLoading) {
+                              setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                            }
+                          }}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

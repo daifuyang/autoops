@@ -2,6 +2,7 @@ import * as acme from 'acme-client'
 import { providerFactory } from '../providers'
 import { AppError } from '../common/error'
 import { prisma } from '../lib/prisma'
+import { syncNginxTlsBindingsByCertificate } from '../deployments/service'
 
 export interface IssueCertificateInput {
   certificateId: string
@@ -82,6 +83,20 @@ export class CertificateService {
       // 如果有部署目标，自动部署
       if (certificate.deployTarget && certificate.deployTarget !== 'manual') {
         await this.deployCertificate(certificateId)
+      }
+
+      const syncResults = await syncNginxTlsBindingsByCertificate(certificateId)
+      if (syncResults.length > 0) {
+        const failed = syncResults.filter((item) => !item.success)
+        await prisma.certLog.create({
+          data: {
+            certificateId,
+            action: 'deploy',
+            status: failed.length === 0 ? 'success' : 'failed',
+            message: failed.length === 0 ? '已同步绑定项目 Nginx 证书配置' : '部分绑定项目 Nginx 证书配置同步失败',
+            details: syncResults as never
+          }
+        })
       }
 
       return result

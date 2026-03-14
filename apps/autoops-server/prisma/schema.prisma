@@ -213,6 +213,7 @@ model Certificate {
   // 关联
   tasks       ScheduledTask[]
   logs        CertLog[]
+  deploymentProjects DeploymentProject[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -394,6 +395,13 @@ model DeploymentProject {
   healthCheckPath String?
   runtimeEnv      Json?
   apiToken        String             @default("")
+  certificateId   String?
+  certificate     Certificate?       @relation(fields: [certificateId], references: [id], onDelete: SetNull)
+  enableTlsAutoBind Boolean          @default(false)
+  nginxServerName String?
+  nginxConfigPath String?
+  nginxCertPath   String?
+  nginxKeyPath    String?
   notifyOnSuccess Boolean            @default(false)
   isActive        Boolean            @default(true)
   createdAt       DateTime           @default(now())
@@ -403,6 +411,7 @@ model DeploymentProject {
   @@index([isActive, createdAt])
   @@index([storageId])
   @@index([targetId])
+  @@index([certificateId])
 }
 
 model DeploymentRecord {

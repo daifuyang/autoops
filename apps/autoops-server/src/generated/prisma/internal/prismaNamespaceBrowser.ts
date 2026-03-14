@@ -328,6 +328,12 @@ export const DeploymentProjectScalarFieldEnum = {
   healthCheckPath: 'healthCheckPath',
   runtimeEnv: 'runtimeEnv',
   apiToken: 'apiToken',
+  certificateId: 'certificateId',
+  enableTlsAutoBind: 'enableTlsAutoBind',
+  nginxServerName: 'nginxServerName',
+  nginxConfigPath: 'nginxConfigPath',
+  nginxCertPath: 'nginxCertPath',
+  nginxKeyPath: 'nginxKeyPath',
   notifyOnSuccess: 'notifyOnSuccess',
   isActive: 'isActive',
   createdAt: 'createdAt',
@@ -579,7 +585,12 @@ export const DeploymentProjectOrderByRelevanceFieldEnum = {
   deployPath: 'deployPath',
   startCommand: 'startCommand',
   healthCheckPath: 'healthCheckPath',
-  apiToken: 'apiToken'
+  apiToken: 'apiToken',
+  certificateId: 'certificateId',
+  nginxServerName: 'nginxServerName',
+  nginxConfigPath: 'nginxConfigPath',
+  nginxCertPath: 'nginxCertPath',
+  nginxKeyPath: 'nginxKeyPath'
 } as const
 
 export type DeploymentProjectOrderByRelevanceFieldEnum = (typeof DeploymentProjectOrderByRelevanceFieldEnum)[keyof typeof DeploymentProjectOrderByRelevanceFieldEnum]

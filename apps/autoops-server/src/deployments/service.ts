@@ -1,10 +1,10 @@
-import { DeploymentRecordStatus, DeploymentStorageType, DeploymentTargetType, TaskType } from '../generated/prisma/client'
+import { CertStatus, DeploymentRecordStatus, DeploymentStorageType, DeploymentTargetType, TaskType } from '../generated/prisma/client'
 import { prisma } from '../lib/prisma'
 import { createTask } from '../tasks/service'
 import { randomBytes } from 'node:crypto'
 import { copyFile, lstat, mkdir, symlink, unlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { basename, isAbsolute, join, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
 import { execFile } from 'node:child_process'
 
 type PaginationInput = {
@@ -46,6 +46,12 @@ type CreateProjectInput = {
   servicePort?: number
   healthCheckPath?: string
   runtimeEnv?: Record<string, string>
+  certificateId?: string
+  enableTlsAutoBind?: boolean
+  nginxServerName?: string
+  nginxConfigPath?: string
+  nginxCertPath?: string
+  nginxKeyPath?: string
   notifyOnSuccess?: boolean
   isActive?: boolean
 }
@@ -72,6 +78,16 @@ type EcsRuntimeConfig = {
   runtimeEnv?: Record<string, string>
   healthCheckPath?: string
   startCommand?: string
+  tlsBinding?: {
+    enabled?: boolean
+    serverName?: string
+    configPath?: string
+    certPath?: string
+    keyPath?: string
+    certPem?: string
+    keyPem?: string
+    certId?: string
+  }
 }
 
 type AgentExecuteInput = {
@@ -112,6 +128,55 @@ function paginationResult<T>(items: T[], page: number, pageSize: number, total: 
     total,
     totalPages: Math.max(Math.ceil(total / pageSize), 1)
   }
+}
+
+function getCnDateKey(date = new Date()) {
+  const utc8 = new Date(date.getTime() + 8 * 60 * 60 * 1000)
+  const year = utc8.getUTCFullYear()
+  const month = String(utc8.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(utc8.getUTCDate()).padStart(2, '0')
+  return `${year}${month}${day}`
+}
+
+function formatBuildId(dateKey: string, sequence: number) {
+  return `v${dateKey}.${String(sequence).padStart(6, '0')}`
+}
+
+function parseBuildSequence(buildId?: string | null) {
+  if (!buildId) {
+    return 0
+  }
+  const matched = /^v\d{8}\.(\d+)$/.exec(buildId)
+  if (!matched) {
+    return 0
+  }
+  return Number(matched[1]) || 0
+}
+
+async function generateNextDailyBuildId(projectId: string) {
+  const dateKey = getCnDateKey()
+  const prefix = `v${dateKey}.`
+  const records = await prisma.deploymentRecord.findMany({
+    where: {
+      projectId,
+      buildId: { startsWith: prefix }
+    },
+    select: { buildId: true }
+  })
+  const maxSequence = records.reduce((max, record) => {
+    const seq = parseBuildSequence(record.buildId)
+    return seq > max ? seq : max
+  }, 0)
+  const nextSequence = maxSequence + 1
+  return formatBuildId(dateKey, nextSequence)
+}
+
+function isBuildIdUniqueConflict(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+  const code = (error as { code?: string }).code
+  return code === 'P2002'
 }
 
 export async function listArtifactStorages(input: PaginationInput = {}) {
@@ -232,7 +297,8 @@ export async function listDeploymentProjects(input: PaginationInput = {}) {
       orderBy: { createdAt: 'desc' },
       include: {
         storage: true,
-        target: true
+        target: true,
+        certificate: true
       },
       skip,
       take: pageSize
@@ -259,12 +325,15 @@ export async function createDeploymentProject(input: CreateProjectInput) {
       healthCheckPath: input.healthCheckPath,
       runtimeEnv: (input.runtimeEnv || {}) as never,
       apiToken,
+      certificateId: input.certificateId,
+      enableTlsAutoBind: Boolean(input.certificateId),
       notifyOnSuccess: input.notifyOnSuccess ?? false,
       isActive: input.isActive ?? true
     },
     include: {
       storage: true,
-      target: true
+      target: true,
+      certificate: true
     }
   })
 }
@@ -286,30 +355,132 @@ export async function updateDeploymentProject(id: string, input: Partial<CreateP
       servicePort: input.servicePort,
       healthCheckPath: input.healthCheckPath,
       runtimeEnv: input.runtimeEnv as never,
+      certificateId: input.certificateId,
+      enableTlsAutoBind: input.certificateId !== undefined ? Boolean(input.certificateId) : undefined,
       notifyOnSuccess: input.notifyOnSuccess,
       isActive: input.isActive
     },
     include: {
       storage: true,
-      target: true
+      target: true,
+      certificate: true
     }
   })
 }
 
-export async function createDeploymentRecord(input: CreateDeploymentRecordInput) {
-  const record = await prisma.deploymentRecord.create({
-    data: {
-      projectId: input.projectId,
-      artifactUri: input.artifactUri,
-      buildId: input.buildId,
-      commitSha: input.commitSha,
-      refName: input.refName,
-      checksum: input.checksum,
-      triggeredBy: input.triggeredBy,
-      metadata: (input.metadata || {}) as never,
-      status: DeploymentRecordStatus.PENDING
+export async function deleteDeploymentProject(id: string) {
+  return prisma.deploymentProject.delete({
+    where: { id },
+    include: {
+      storage: true,
+      target: true,
+      certificate: true
     }
   })
+}
+
+export async function listAvailableCertificates() {
+  return prisma.certificate.findMany({
+    where: {
+      status: CertStatus.ACTIVE,
+      certPem: { not: null },
+      keyPem: { not: null }
+    },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      name: true,
+      domain: true,
+      status: true,
+      expiresAt: true
+    }
+  })
+}
+
+export async function syncNginxTlsBindingsByCertificate(certificateId: string) {
+  const projects = await prisma.deploymentProject.findMany({
+    where: {
+      certificateId,
+      enableTlsAutoBind: true,
+      isActive: true
+    },
+    include: {
+      certificate: true
+    }
+  })
+  const results: Array<{ projectId: string; success: boolean; message: string }> = []
+  for (const project of projects) {
+    try {
+      const runtimeConfig = resolveProjectRuntimeConfig({
+        name: project.name,
+        deployPath: project.deployPath,
+        servicePort: project.servicePort,
+        healthCheckPath: project.healthCheckPath,
+        runtimeEnv: project.runtimeEnv,
+        startCommand: project.startCommand,
+        enableTlsAutoBind: project.enableTlsAutoBind,
+        nginxServerName: project.nginxServerName,
+        nginxConfigPath: project.nginxConfigPath,
+        nginxCertPath: project.nginxCertPath,
+        nginxKeyPath: project.nginxKeyPath,
+        certificateId: project.certificateId,
+        certificate: project.certificate
+          ? {
+            id: project.certificate.id,
+            domain: project.certificate.domain,
+            certPem: project.certificate.certPem,
+            keyPem: project.certificate.keyPem,
+            status: project.certificate.status
+          }
+          : null
+      })
+      await applyNginxTlsBinding(runtimeConfig)
+      results.push({ projectId: project.id, success: true, message: 'nginx 证书绑定同步成功' })
+    } catch (error) {
+      results.push({
+        projectId: project.id,
+        success: false,
+        message: error instanceof Error ? error.message : 'nginx 证书绑定同步失败'
+      })
+    }
+  }
+  return results
+}
+
+export async function createDeploymentRecord(input: CreateDeploymentRecordInput) {
+  let record: Awaited<ReturnType<typeof prisma.deploymentRecord.create>> | null = null
+  let latestError: unknown = null
+
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const nextBuildId = await generateNextDailyBuildId(input.projectId)
+    try {
+      record = await prisma.deploymentRecord.create({
+        data: {
+          projectId: input.projectId,
+          artifactUri: input.artifactUri,
+          buildId: nextBuildId,
+          commitSha: input.commitSha,
+          refName: input.refName,
+          checksum: input.checksum,
+          triggeredBy: input.triggeredBy,
+          metadata: (input.metadata || {}) as never,
+          status: DeploymentRecordStatus.PENDING
+        }
+      })
+      break
+    } catch (error) {
+      if (isBuildIdUniqueConflict(error)) {
+        latestError = error
+        continue
+      }
+      throw error
+    }
+  }
+
+  if (!record) {
+    throw latestError || new Error('构建版本号生成失败，请稍后重试')
+  }
+
   const task = await createTask({
     name: `部署执行:${record.id}`,
     type: TaskType.DEPLOY_EXECUTE,
@@ -490,6 +661,9 @@ function safeRuntimeConfig(raw: Record<string, unknown>): EcsRuntimeConfig {
   const runtimeEnv = Object.fromEntries(
     Object.entries(runtimeEnvRaw).map(([k, v]) => [k, String(v)])
   )
+  const tlsBindingRaw = raw.tlsBinding && typeof raw.tlsBinding === 'object'
+    ? raw.tlsBinding as Record<string, unknown>
+    : null
   if (!deployPath) {
     throw new Error('ECS 目标缺少 deployPath 配置')
   }
@@ -499,7 +673,17 @@ function safeRuntimeConfig(raw: Record<string, unknown>): EcsRuntimeConfig {
     port: Number.isFinite(port) && port > 0 ? port : undefined,
     healthCheckPath: healthCheckPath || '/',
     runtimeEnv,
-    startCommand: startCommand || undefined
+    startCommand: startCommand || undefined,
+    tlsBinding: tlsBindingRaw ? {
+      enabled: Boolean(tlsBindingRaw.enabled),
+      serverName: tlsBindingRaw.serverName ? String(tlsBindingRaw.serverName) : undefined,
+      configPath: tlsBindingRaw.configPath ? String(tlsBindingRaw.configPath) : undefined,
+      certPath: tlsBindingRaw.certPath ? String(tlsBindingRaw.certPath) : undefined,
+      keyPath: tlsBindingRaw.keyPath ? String(tlsBindingRaw.keyPath) : undefined,
+      certPem: tlsBindingRaw.certPem ? String(tlsBindingRaw.certPem) : undefined,
+      keyPem: tlsBindingRaw.keyPem ? String(tlsBindingRaw.keyPem) : undefined,
+      certId: tlsBindingRaw.certId ? String(tlsBindingRaw.certId) : undefined
+    } : undefined
   }
 }
 
@@ -510,6 +694,19 @@ function resolveProjectRuntimeConfig(project: {
   healthCheckPath: string | null
   runtimeEnv: unknown
   startCommand?: string | null
+  enableTlsAutoBind?: boolean | null
+  nginxServerName?: string | null
+  nginxConfigPath?: string | null
+  nginxCertPath?: string | null
+  nginxKeyPath?: string | null
+  certificateId?: string | null
+  certificate?: {
+    id: string
+    domain: string
+    certPem?: string | null
+    keyPem?: string | null
+    status: CertStatus
+  } | null
 }) {
   const runtimeEnvRaw = project.runtimeEnv && typeof project.runtimeEnv === 'object'
     ? project.runtimeEnv as Record<string, unknown>
@@ -517,13 +714,29 @@ function resolveProjectRuntimeConfig(project: {
   const runtimeEnv = Object.fromEntries(
     Object.entries(runtimeEnvRaw).map(([k, v]) => [k, String(v)])
   )
+  const domain = (project.certificate?.domain || '').trim()
+  const normalizedDomain = domain
+    .replace(/^\*\./, 'wildcard.')
+    .replace(/[^\w.-]/g, '-')
+  const nginxProjectRoot = resolve(String(process.env.NGINX_PROJECT_ROOT || process.cwd()).trim() || process.cwd())
+  const defaultNginxConfigPath = normalizedDomain
+    ? join(nginxProjectRoot, 'nginx', `${normalizedDomain}.conf`)
+    : undefined
   return {
     appName: normalizePm2AppName(project.name),
     deployPath: String(project.deployPath || '').trim(),
     port: project.servicePort || undefined,
     healthCheckPath: project.healthCheckPath || '/',
     runtimeEnv,
-    startCommand: (project.startCommand || undefined) || undefined
+    startCommand: (project.startCommand || undefined) || undefined,
+    tlsBinding: {
+      enabled: Boolean(project.enableTlsAutoBind && project.certificateId),
+      serverName: (project.certificate?.domain || '').trim() || undefined,
+      configPath: defaultNginxConfigPath,
+      certPem: project.certificate?.certPem || undefined,
+      keyPem: project.certificate?.keyPem || undefined,
+      certId: project.certificate?.id || undefined
+    }
   } as EcsRuntimeConfig
 }
 
@@ -625,6 +838,35 @@ async function runPm2Deploy(ecosystemPath: string, appName: string) {
   await execFileAsync('pm2', ['save'])
 }
 
+async function applyNginxTlsBinding(runtimeConfig: EcsRuntimeConfig) {
+  const tls = runtimeConfig.tlsBinding
+  if (!tls?.enabled) {
+    return null
+  }
+  if (!tls.serverName || !tls.configPath || !tls.certPem || !tls.keyPem) {
+    throw new Error('启用证书绑定时，缺少域名或证书内容，无法生成 Nginx 配置')
+  }
+  const certPath = tls.certPath || join(runtimeConfig.deployPath, 'tls', `${runtimeConfig.appName}.crt`)
+  const keyPath = tls.keyPath || join(runtimeConfig.deployPath, 'tls', `${runtimeConfig.appName}.key`)
+  await mkdir(dirname(certPath), { recursive: true })
+  await mkdir(dirname(keyPath), { recursive: true })
+  await mkdir(dirname(tls.configPath), { recursive: true })
+  await writeFile(certPath, tls.certPem, 'utf8')
+  await writeFile(keyPath, tls.keyPem, 'utf8')
+  const nginxConfig = `server {\n  listen 443 ssl;\n  server_name ${tls.serverName};\n\n  ssl_certificate ${certPath};\n  ssl_certificate_key ${keyPath};\n\n  location / {\n    proxy_set_header Host $host;\n    proxy_set_header X-Real-IP $remote_addr;\n    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    proxy_set_header X-Forwarded-Proto $scheme;\n    proxy_pass http://127.0.0.1:${runtimeConfig.port || 3000};\n  }\n}\n`
+  await writeFile(tls.configPath, nginxConfig, 'utf8')
+  const nginxBin = process.env.NGINX_BIN || 'nginx'
+  await execFileAsync(nginxBin, ['-t'])
+  await execFileAsync(nginxBin, ['-s', 'reload'])
+  return {
+    certPath,
+    keyPath,
+    configPath: tls.configPath,
+    serverName: tls.serverName,
+    certId: tls.certId || ''
+  }
+}
+
 async function verifyHealth(port?: number, healthCheckPath?: string) {
   if (!port) {
     return
@@ -650,10 +892,12 @@ export async function executeEcsAgentDeployment(input: AgentExecuteInput) {
   const ecosystemPath = await ensureEcosystemConfig(releaseDir, input.runtimeConfig)
   await switchCurrentRelease(projectDir, releaseDir)
   await runPm2Deploy(ecosystemPath, input.runtimeConfig.appName)
+  const nginxBinding = await applyNginxTlsBinding(input.runtimeConfig)
   await verifyHealth(input.runtimeConfig.port, input.runtimeConfig.healthCheckPath)
   return {
     releaseDir,
-    artifactPath: artifact.localPath
+    artifactPath: artifact.localPath,
+    nginxBinding
   }
 }
 
@@ -691,7 +935,8 @@ export async function executeDeploymentTask(payload: { deploymentRecordId: strin
       project: {
         include: {
           storage: true,
-          target: true
+          target: true,
+          certificate: true
         }
       }
     }

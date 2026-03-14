@@ -324,6 +324,7 @@ export type CertificateWhereInput = {
   deployProvider?: Prisma.XOR<Prisma.ProviderNullableScalarRelationFilter, Prisma.ProviderWhereInput> | null
   tasks?: Prisma.ScheduledTaskListRelationFilter
   logs?: Prisma.CertLogListRelationFilter
+  deploymentProjects?: Prisma.DeploymentProjectListRelationFilter
 }
 
 export type CertificateOrderByWithRelationInput = {
@@ -350,6 +351,7 @@ export type CertificateOrderByWithRelationInput = {
   deployProvider?: Prisma.ProviderOrderByWithRelationInput
   tasks?: Prisma.ScheduledTaskOrderByRelationAggregateInput
   logs?: Prisma.CertLogOrderByRelationAggregateInput
+  deploymentProjects?: Prisma.DeploymentProjectOrderByRelationAggregateInput
   _relevance?: Prisma.CertificateOrderByRelevanceInput
 }
 
@@ -380,6 +382,7 @@ export type CertificateWhereUniqueInput = Prisma.AtLeast<{
   deployProvider?: Prisma.XOR<Prisma.ProviderNullableScalarRelationFilter, Prisma.ProviderWhereInput> | null
   tasks?: Prisma.ScheduledTaskListRelationFilter
   logs?: Prisma.CertLogListRelationFilter
+  deploymentProjects?: Prisma.DeploymentProjectListRelationFilter
 }, "id">
 
 export type CertificateOrderByWithAggregationInput = {
@@ -456,6 +459,7 @@ export type CertificateCreateInput = {
   deployProvider?: Prisma.ProviderCreateNestedOneWithoutDeployCertificatesInput
   tasks?: Prisma.ScheduledTaskCreateNestedManyWithoutCertificateInput
   logs?: Prisma.CertLogCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateUncheckedCreateInput = {
@@ -480,6 +484,7 @@ export type CertificateUncheckedCreateInput = {
   updatedAt?: Date | string
   tasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutCertificateInput
   logs?: Prisma.CertLogUncheckedCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateUpdateInput = {
@@ -504,6 +509,7 @@ export type CertificateUpdateInput = {
   deployProvider?: Prisma.ProviderUpdateOneWithoutDeployCertificatesNestedInput
   tasks?: Prisma.ScheduledTaskUpdateManyWithoutCertificateNestedInput
   logs?: Prisma.CertLogUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateUncheckedUpdateInput = {
@@ -528,6 +534,7 @@ export type CertificateUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutCertificateNestedInput
   logs?: Prisma.CertLogUncheckedUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateCreateManyInput = {
@@ -808,6 +815,22 @@ export type CertificateUpdateOneRequiredWithoutLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CertificateUpdateToOneWithWhereWithoutLogsInput, Prisma.CertificateUpdateWithoutLogsInput>, Prisma.CertificateUncheckedUpdateWithoutLogsInput>
 }
 
+export type CertificateCreateNestedOneWithoutDeploymentProjectsInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutDeploymentProjectsInput, Prisma.CertificateUncheckedCreateWithoutDeploymentProjectsInput>
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutDeploymentProjectsInput
+  connect?: Prisma.CertificateWhereUniqueInput
+}
+
+export type CertificateUpdateOneWithoutDeploymentProjectsNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutDeploymentProjectsInput, Prisma.CertificateUncheckedCreateWithoutDeploymentProjectsInput>
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutDeploymentProjectsInput
+  upsert?: Prisma.CertificateUpsertWithoutDeploymentProjectsInput
+  disconnect?: Prisma.CertificateWhereInput | boolean
+  delete?: Prisma.CertificateWhereInput | boolean
+  connect?: Prisma.CertificateWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CertificateUpdateToOneWithWhereWithoutDeploymentProjectsInput, Prisma.CertificateUpdateWithoutDeploymentProjectsInput>, Prisma.CertificateUncheckedUpdateWithoutDeploymentProjectsInput>
+}
+
 export type CertificateCreateWithoutTasksInput = {
   id?: string
   name: string
@@ -829,6 +852,7 @@ export type CertificateCreateWithoutTasksInput = {
   dnsProvider: Prisma.ProviderCreateNestedOneWithoutDnsCertificatesInput
   deployProvider?: Prisma.ProviderCreateNestedOneWithoutDeployCertificatesInput
   logs?: Prisma.CertLogCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateUncheckedCreateWithoutTasksInput = {
@@ -852,6 +876,7 @@ export type CertificateUncheckedCreateWithoutTasksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   logs?: Prisma.CertLogUncheckedCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateCreateOrConnectWithoutTasksInput = {
@@ -891,6 +916,7 @@ export type CertificateUpdateWithoutTasksInput = {
   dnsProvider?: Prisma.ProviderUpdateOneRequiredWithoutDnsCertificatesNestedInput
   deployProvider?: Prisma.ProviderUpdateOneWithoutDeployCertificatesNestedInput
   logs?: Prisma.CertLogUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateUncheckedUpdateWithoutTasksInput = {
@@ -914,6 +940,7 @@ export type CertificateUncheckedUpdateWithoutTasksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   logs?: Prisma.CertLogUncheckedUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateCreateWithoutDnsProviderInput = {
@@ -937,6 +964,7 @@ export type CertificateCreateWithoutDnsProviderInput = {
   deployProvider?: Prisma.ProviderCreateNestedOneWithoutDeployCertificatesInput
   tasks?: Prisma.ScheduledTaskCreateNestedManyWithoutCertificateInput
   logs?: Prisma.CertLogCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateUncheckedCreateWithoutDnsProviderInput = {
@@ -960,6 +988,7 @@ export type CertificateUncheckedCreateWithoutDnsProviderInput = {
   updatedAt?: Date | string
   tasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutCertificateInput
   logs?: Prisma.CertLogUncheckedCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateCreateOrConnectWithoutDnsProviderInput = {
@@ -993,6 +1022,7 @@ export type CertificateCreateWithoutDeployProviderInput = {
   dnsProvider: Prisma.ProviderCreateNestedOneWithoutDnsCertificatesInput
   tasks?: Prisma.ScheduledTaskCreateNestedManyWithoutCertificateInput
   logs?: Prisma.CertLogCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateUncheckedCreateWithoutDeployProviderInput = {
@@ -1016,6 +1046,7 @@ export type CertificateUncheckedCreateWithoutDeployProviderInput = {
   updatedAt?: Date | string
   tasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutCertificateInput
   logs?: Prisma.CertLogUncheckedCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateCreateOrConnectWithoutDeployProviderInput = {
@@ -1106,6 +1137,7 @@ export type CertificateCreateWithoutLogsInput = {
   dnsProvider: Prisma.ProviderCreateNestedOneWithoutDnsCertificatesInput
   deployProvider?: Prisma.ProviderCreateNestedOneWithoutDeployCertificatesInput
   tasks?: Prisma.ScheduledTaskCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateUncheckedCreateWithoutLogsInput = {
@@ -1129,6 +1161,7 @@ export type CertificateUncheckedCreateWithoutLogsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutCertificateInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateCreateOrConnectWithoutLogsInput = {
@@ -1168,6 +1201,7 @@ export type CertificateUpdateWithoutLogsInput = {
   dnsProvider?: Prisma.ProviderUpdateOneRequiredWithoutDnsCertificatesNestedInput
   deployProvider?: Prisma.ProviderUpdateOneWithoutDeployCertificatesNestedInput
   tasks?: Prisma.ScheduledTaskUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateUncheckedUpdateWithoutLogsInput = {
@@ -1191,6 +1225,119 @@ export type CertificateUncheckedUpdateWithoutLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateCreateWithoutDeploymentProjectsInput = {
+  id?: string
+  name: string
+  domain: string
+  wildcard?: boolean
+  sanDomains?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deployTarget?: string | null
+  deployConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  certPem?: string | null
+  keyPem?: string | null
+  chainPem?: string | null
+  status?: $Enums.CertStatus
+  expiresAt?: Date | string | null
+  issuedAt?: Date | string | null
+  autoRenew?: boolean
+  renewDays?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  dnsProvider: Prisma.ProviderCreateNestedOneWithoutDnsCertificatesInput
+  deployProvider?: Prisma.ProviderCreateNestedOneWithoutDeployCertificatesInput
+  tasks?: Prisma.ScheduledTaskCreateNestedManyWithoutCertificateInput
+  logs?: Prisma.CertLogCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateUncheckedCreateWithoutDeploymentProjectsInput = {
+  id?: string
+  name: string
+  domain: string
+  wildcard?: boolean
+  sanDomains?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  dnsProviderId: string
+  deployTarget?: string | null
+  deployProviderId?: string | null
+  deployConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  certPem?: string | null
+  keyPem?: string | null
+  chainPem?: string | null
+  status?: $Enums.CertStatus
+  expiresAt?: Date | string | null
+  issuedAt?: Date | string | null
+  autoRenew?: boolean
+  renewDays?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutCertificateInput
+  logs?: Prisma.CertLogUncheckedCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateCreateOrConnectWithoutDeploymentProjectsInput = {
+  where: Prisma.CertificateWhereUniqueInput
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutDeploymentProjectsInput, Prisma.CertificateUncheckedCreateWithoutDeploymentProjectsInput>
+}
+
+export type CertificateUpsertWithoutDeploymentProjectsInput = {
+  update: Prisma.XOR<Prisma.CertificateUpdateWithoutDeploymentProjectsInput, Prisma.CertificateUncheckedUpdateWithoutDeploymentProjectsInput>
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutDeploymentProjectsInput, Prisma.CertificateUncheckedCreateWithoutDeploymentProjectsInput>
+  where?: Prisma.CertificateWhereInput
+}
+
+export type CertificateUpdateToOneWithWhereWithoutDeploymentProjectsInput = {
+  where?: Prisma.CertificateWhereInput
+  data: Prisma.XOR<Prisma.CertificateUpdateWithoutDeploymentProjectsInput, Prisma.CertificateUncheckedUpdateWithoutDeploymentProjectsInput>
+}
+
+export type CertificateUpdateWithoutDeploymentProjectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  domain?: Prisma.StringFieldUpdateOperationsInput | string
+  wildcard?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sanDomains?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deployTarget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deployConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  certPem?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  keyPem?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chainPem?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCertStatusFieldUpdateOperationsInput | $Enums.CertStatus
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoRenew?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewDays?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dnsProvider?: Prisma.ProviderUpdateOneRequiredWithoutDnsCertificatesNestedInput
+  deployProvider?: Prisma.ProviderUpdateOneWithoutDeployCertificatesNestedInput
+  tasks?: Prisma.ScheduledTaskUpdateManyWithoutCertificateNestedInput
+  logs?: Prisma.CertLogUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateUncheckedUpdateWithoutDeploymentProjectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  domain?: Prisma.StringFieldUpdateOperationsInput | string
+  wildcard?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sanDomains?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  dnsProviderId?: Prisma.StringFieldUpdateOperationsInput | string
+  deployTarget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deployProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deployConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  certPem?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  keyPem?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chainPem?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumCertStatusFieldUpdateOperationsInput | $Enums.CertStatus
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoRenew?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewDays?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutCertificateNestedInput
+  logs?: Prisma.CertLogUncheckedUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateCreateManyDnsProviderInput = {
@@ -1256,6 +1403,7 @@ export type CertificateUpdateWithoutDnsProviderInput = {
   deployProvider?: Prisma.ProviderUpdateOneWithoutDeployCertificatesNestedInput
   tasks?: Prisma.ScheduledTaskUpdateManyWithoutCertificateNestedInput
   logs?: Prisma.CertLogUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateUncheckedUpdateWithoutDnsProviderInput = {
@@ -1279,6 +1427,7 @@ export type CertificateUncheckedUpdateWithoutDnsProviderInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutCertificateNestedInput
   logs?: Prisma.CertLogUncheckedUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateUncheckedUpdateManyWithoutDnsProviderInput = {
@@ -1323,6 +1472,7 @@ export type CertificateUpdateWithoutDeployProviderInput = {
   dnsProvider?: Prisma.ProviderUpdateOneRequiredWithoutDnsCertificatesNestedInput
   tasks?: Prisma.ScheduledTaskUpdateManyWithoutCertificateNestedInput
   logs?: Prisma.CertLogUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateUncheckedUpdateWithoutDeployProviderInput = {
@@ -1346,6 +1496,7 @@ export type CertificateUncheckedUpdateWithoutDeployProviderInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutCertificateNestedInput
   logs?: Prisma.CertLogUncheckedUpdateManyWithoutCertificateNestedInput
+  deploymentProjects?: Prisma.DeploymentProjectUncheckedUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateUncheckedUpdateManyWithoutDeployProviderInput = {
@@ -1377,11 +1528,13 @@ export type CertificateUncheckedUpdateManyWithoutDeployProviderInput = {
 export type CertificateCountOutputType = {
   tasks: number
   logs: number
+  deploymentProjects: number
 }
 
 export type CertificateCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tasks?: boolean | CertificateCountOutputTypeCountTasksArgs
   logs?: boolean | CertificateCountOutputTypeCountLogsArgs
+  deploymentProjects?: boolean | CertificateCountOutputTypeCountDeploymentProjectsArgs
 }
 
 /**
@@ -1406,6 +1559,13 @@ export type CertificateCountOutputTypeCountTasksArgs<ExtArgs extends runtime.Typ
  */
 export type CertificateCountOutputTypeCountLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.CertLogWhereInput
+}
+
+/**
+ * CertificateCountOutputType without action
+ */
+export type CertificateCountOutputTypeCountDeploymentProjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DeploymentProjectWhereInput
 }
 
 
@@ -1433,6 +1593,7 @@ export type CertificateSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   deployProvider?: boolean | Prisma.Certificate$deployProviderArgs<ExtArgs>
   tasks?: boolean | Prisma.Certificate$tasksArgs<ExtArgs>
   logs?: boolean | Prisma.Certificate$logsArgs<ExtArgs>
+  deploymentProjects?: boolean | Prisma.Certificate$deploymentProjectsArgs<ExtArgs>
   _count?: boolean | Prisma.CertificateCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["certificate"]>
 
@@ -1466,6 +1627,7 @@ export type CertificateInclude<ExtArgs extends runtime.Types.Extensions.Internal
   deployProvider?: boolean | Prisma.Certificate$deployProviderArgs<ExtArgs>
   tasks?: boolean | Prisma.Certificate$tasksArgs<ExtArgs>
   logs?: boolean | Prisma.Certificate$logsArgs<ExtArgs>
+  deploymentProjects?: boolean | Prisma.Certificate$deploymentProjectsArgs<ExtArgs>
   _count?: boolean | Prisma.CertificateCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1476,6 +1638,7 @@ export type $CertificatePayload<ExtArgs extends runtime.Types.Extensions.Interna
     deployProvider: Prisma.$ProviderPayload<ExtArgs> | null
     tasks: Prisma.$ScheduledTaskPayload<ExtArgs>[]
     logs: Prisma.$CertLogPayload<ExtArgs>[]
+    deploymentProjects: Prisma.$DeploymentProjectPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1841,6 +2004,7 @@ export interface Prisma__CertificateClient<T, Null = never, ExtArgs extends runt
   deployProvider<T extends Prisma.Certificate$deployProviderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Certificate$deployProviderArgs<ExtArgs>>): Prisma.Prisma__ProviderClient<runtime.Types.Result.GetResult<Prisma.$ProviderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   tasks<T extends Prisma.Certificate$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Certificate$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduledTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   logs<T extends Prisma.Certificate$logsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Certificate$logsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CertLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  deploymentProjects<T extends Prisma.Certificate$deploymentProjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Certificate$deploymentProjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DeploymentProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2296,6 +2460,30 @@ export type Certificate$logsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.CertLogScalarFieldEnum | Prisma.CertLogScalarFieldEnum[]
+}
+
+/**
+ * Certificate.deploymentProjects
+ */
+export type Certificate$deploymentProjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DeploymentProject
+   */
+  select?: Prisma.DeploymentProjectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DeploymentProject
+   */
+  omit?: Prisma.DeploymentProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeploymentProjectInclude<ExtArgs> | null
+  where?: Prisma.DeploymentProjectWhereInput
+  orderBy?: Prisma.DeploymentProjectOrderByWithRelationInput | Prisma.DeploymentProjectOrderByWithRelationInput[]
+  cursor?: Prisma.DeploymentProjectWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DeploymentProjectScalarFieldEnum | Prisma.DeploymentProjectScalarFieldEnum[]
 }
 
 /**

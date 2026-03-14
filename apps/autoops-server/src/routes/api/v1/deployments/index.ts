@@ -11,9 +11,11 @@ import {
   createDeploymentProject,
   createDeploymentRecord,
   createDeployTarget,
+  deleteDeploymentProject,
   executeEcsAgentDeployment,
   getDeploymentRecord,
   listArtifactStorages,
+  listAvailableCertificates,
   listDeploymentProjects,
   listDeploymentRecords,
   listDeployTargets,
@@ -80,6 +82,12 @@ const projectSchema = {
     servicePort: { type: 'number', nullable: true },
     healthCheckPath: { type: 'string', nullable: true },
     runtimeEnv: { type: 'object', nullable: true },
+    certificateId: { type: 'string', nullable: true },
+    enableTlsAutoBind: { type: 'boolean' },
+    nginxServerName: { type: 'string', nullable: true },
+    nginxConfigPath: { type: 'string', nullable: true },
+    nginxCertPath: { type: 'string', nullable: true },
+    nginxKeyPath: { type: 'string', nullable: true },
     apiToken: { type: 'string' },
     deployMethod: { type: 'string' },
     deployWebhookPath: { type: 'string' },
@@ -89,7 +97,18 @@ const projectSchema = {
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
     storage: storageSchema,
-    target: targetSchema
+    target: targetSchema,
+    certificate: {
+      type: 'object',
+      nullable: true,
+      properties: {
+        id: { type: 'string' },
+        name: { type: 'string' },
+        domain: { type: 'string' },
+        status: { type: 'string' },
+        expiresAt: { type: 'string', format: 'date-time', nullable: true }
+      }
+    }
   }
 }
 
@@ -295,6 +314,32 @@ const routes: FastifyPluginAsync = async (fastify) => {
     })
   })
 
+  fastify.get('/certificates/available', {
+    schema: {
+      operationId: 'listAvailableCertificates',
+      tags: ['Deployments'],
+      summary: '获取可绑定证书列表',
+      response: {
+        200: apiResponseSchema({
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              name: { type: 'string' },
+              domain: { type: 'string' },
+              status: { type: 'string' },
+              expiresAt: { type: 'string', format: 'date-time', nullable: true }
+            }
+          }
+        })
+      }
+    }
+  }, async () => {
+    const data = await listAvailableCertificates()
+    return success(data)
+  })
+
   fastify.post<{
     Body: {
       name: string
@@ -307,6 +352,12 @@ const routes: FastifyPluginAsync = async (fastify) => {
       servicePort?: number
       healthCheckPath?: string
       runtimeEnv?: Record<string, string>
+      certificateId?: string
+      enableTlsAutoBind?: boolean
+      nginxServerName?: string
+      nginxConfigPath?: string
+      nginxCertPath?: string
+      nginxKeyPath?: string
       notifyOnSuccess?: boolean
       isActive?: boolean
     }
@@ -329,6 +380,12 @@ const routes: FastifyPluginAsync = async (fastify) => {
           servicePort: { type: 'number' },
           healthCheckPath: { type: 'string' },
           runtimeEnv: { type: 'object', additionalProperties: { type: 'string' } },
+          certificateId: { type: 'string' },
+          enableTlsAutoBind: { type: 'boolean' },
+          nginxServerName: { type: 'string' },
+          nginxConfigPath: { type: 'string' },
+          nginxCertPath: { type: 'string' },
+          nginxKeyPath: { type: 'string' },
           notifyOnSuccess: { type: 'boolean' },
           isActive: { type: 'boolean' }
         }
@@ -338,7 +395,10 @@ const routes: FastifyPluginAsync = async (fastify) => {
       }
     }
   }, async (request) => {
-    const data = await createDeploymentProject(request.body)
+    const data = await createDeploymentProject({
+      ...request.body,
+      enableTlsAutoBind: Boolean(request.body.certificateId)
+    })
     return success(withProjectWebhook(data as { apiToken: string }))
   })
 
@@ -355,6 +415,12 @@ const routes: FastifyPluginAsync = async (fastify) => {
       servicePort?: number
       healthCheckPath?: string
       runtimeEnv?: Record<string, string>
+      certificateId?: string
+      enableTlsAutoBind?: boolean
+      nginxServerName?: string
+      nginxConfigPath?: string
+      nginxCertPath?: string
+      nginxKeyPath?: string
       notifyOnSuccess?: boolean
       isActive?: boolean
     }
@@ -381,6 +447,12 @@ const routes: FastifyPluginAsync = async (fastify) => {
           servicePort: { type: 'number' },
           healthCheckPath: { type: 'string' },
           runtimeEnv: { type: 'object', additionalProperties: { type: 'string' } },
+          certificateId: { type: 'string' },
+          enableTlsAutoBind: { type: 'boolean' },
+          nginxServerName: { type: 'string' },
+          nginxConfigPath: { type: 'string' },
+          nginxCertPath: { type: 'string' },
+          nginxKeyPath: { type: 'string' },
           notifyOnSuccess: { type: 'boolean' },
           isActive: { type: 'boolean' }
         }
@@ -391,7 +463,33 @@ const routes: FastifyPluginAsync = async (fastify) => {
     }
   }, async (request, reply) => {
     try {
-      const data = await updateDeploymentProject(request.params.id, request.body)
+      const data = await updateDeploymentProject(request.params.id, {
+        ...request.body,
+        enableTlsAutoBind: request.body.certificateId ? true : undefined
+      })
+      return success(withProjectWebhook(data as { apiToken: string }))
+    } catch {
+      return (reply as any).status(404).send(errors.notFound('部署项目不存在'))
+    }
+  })
+
+  fastify.delete<{ Params: { id: string } }>('/projects/:id', {
+    schema: {
+      operationId: 'deleteDeploymentProject',
+      tags: ['Deployments'],
+      summary: '删除部署项目',
+      params: {
+        type: 'object',
+        properties: { id: { type: 'string' } },
+        required: ['id']
+      },
+      response: {
+        200: apiResponseSchema(projectSchema)
+      }
+    }
+  }, async (request, reply) => {
+    try {
+      const data = await deleteDeploymentProject(request.params.id)
       return success(withProjectWebhook(data as { apiToken: string }))
     } catch {
       return (reply as any).status(404).send(errors.notFound('部署项目不存在'))
@@ -602,6 +700,17 @@ const routes: FastifyPluginAsync = async (fastify) => {
         port?: number
         runtimeEnv?: Record<string, string>
         healthCheckPath?: string
+        startCommand?: string
+        tlsBinding?: {
+          enabled?: boolean
+          serverName?: string
+          configPath?: string
+          certPath?: string
+          keyPath?: string
+          certPem?: string
+          keyPem?: string
+          certId?: string
+        }
       }
     }
   }>('/agent/execute', {
@@ -625,7 +734,20 @@ const routes: FastifyPluginAsync = async (fastify) => {
               port: { type: 'number' },
               runtimeEnv: { type: 'object', additionalProperties: { type: 'string' } },
               healthCheckPath: { type: 'string' },
-              startCommand: { type: 'string' }
+              startCommand: { type: 'string' },
+              tlsBinding: {
+                type: 'object',
+                properties: {
+                  enabled: { type: 'boolean' },
+                  serverName: { type: 'string' },
+                  configPath: { type: 'string' },
+                  certPath: { type: 'string' },
+                  keyPath: { type: 'string' },
+                  certPem: { type: 'string' },
+                  keyPem: { type: 'string' },
+                  certId: { type: 'string' }
+                }
+              }
             }
           }
         }

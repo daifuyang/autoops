@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Box, CheckCircle2, CircleDashed, Clock, Copy, FolderUp, History, KeyRound, Play, RefreshCw, Rocket, Search, Server, Terminal, UploadCloud, XCircle } from "lucide-react";
+import { ArrowLeft, Box, CheckCircle2, ChevronRight, CircleDashed, Clock, Copy, FolderUp, History, KeyRound, Play, RefreshCw, Rocket, Search, Server, Terminal, UploadCloud, XCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +59,7 @@ export default function DeploymentProjectDetailPage() {
   const [recordStepLogs, setRecordStepLogs] = useState<Record<string, DeploymentStepLogItem[]>>({});
   const [recordStepLogErrors, setRecordStepLogErrors] = useState<Record<string, string>>({});
   const [stepLogLoadingRecordId, setStepLogLoadingRecordId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
 
   const fetchData = useCallback(async () => {
     if (!projectId) {
@@ -67,25 +68,40 @@ export default function DeploymentProjectDetailPage() {
     setIsLoading(true);
     setError("");
     try {
-      const [projectRes, recordRes] = await Promise.all([
+      const [projectRes, recordRes] = await Promise.allSettled([
         api.listDeploymentProjects({ page: 1, pageSize: 100 }),
         api.listDeploymentRecords({ page: 1, pageSize: 50, projectId }),
       ]);
-      const projectData = projectRes.data?.data;
-      const projectItems = Array.isArray(projectData) ? projectData : projectData?.items || [];
-      const matched = (projectItems as DeploymentProjectItem[]).find((item) => item.id === projectId) || null;
-      if (!matched) {
+
+      if (projectRes.status === "fulfilled") {
+        const projectData = projectRes.value.data?.data;
+        const projectItems = Array.isArray(projectData) ? projectData : projectData?.items || [];
+        const matched = (projectItems as DeploymentProjectItem[]).find((item) => item.id === projectId) || null;
+        if (!matched) {
+          setProject(null);
+          setRecords([]);
+          setError("项目不存在或已删除");
+          return;
+        }
+        setProject(matched);
+      } else {
         setProject(null);
         setRecords([]);
-        setError("项目不存在或已删除");
+        setRecordStepLogs({});
+        setRecordStepLogErrors({});
+        setError("获取项目部署数据失败，请稍后重试");
         return;
       }
-      setProject(matched);
-      const recordData = recordRes.data?.data;
-      const recordItems = Array.isArray(recordData) ? recordData : recordData?.items || [];
-      setRecords(recordItems as DeploymentRecordItem[]);
-      setRecordStepLogs({});
-      setRecordStepLogErrors({});
+
+      if (recordRes.status === "fulfilled") {
+        const recordData = recordRes.value.data?.data;
+        const recordItems = Array.isArray(recordData) ? recordData : recordData?.items || [];
+        setRecords(recordItems as DeploymentRecordItem[]);
+        setRecordStepLogs({});
+        setRecordStepLogErrors({});
+      } else {
+        setError("获取部署记录失败，请稍后重试");
+      }
     } catch {
       setProject(null);
       setRecords([]);
@@ -272,6 +288,22 @@ export default function DeploymentProjectDetailPage() {
     return Array.from(uniqueMap.values());
   }, [records]);
 
+  const middleEllipsis = useCallback((value: string, head = 22, tail = 16) => {
+    if (!value || value.length <= head + tail + 1) {
+      return value;
+    }
+    return `${value.slice(0, head)}...${value.slice(-tail)}`;
+  }, []);
+
+  const selectedArtifactLabel = useMemo(() => {
+    const selected = artifactOptions.find((item) => item.artifactUri === selectedArtifactUri);
+    if (!selected) {
+      return "";
+    }
+    const version = selected.buildId || "未标记版本";
+    return `${version} · ${middleEllipsis(selected.artifactUri)}`;
+  }, [artifactOptions, middleEllipsis, selectedArtifactUri]);
+
   const activeRecordLogs = useMemo(() => {
     const logs = recordStepLogs[activeRecordId] || [];
     const keyword = logSearch.trim().toLowerCase();
@@ -301,31 +333,36 @@ export default function DeploymentProjectDetailPage() {
 
   return (
     <div className="flex flex-col gap-8 p-4 md:p-8">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/deployments" className="hover:text-foreground transition-colors">应用部署</Link>
-          <span>/</span>
-          <span className="text-foreground font-medium">{project?.name || "加载中..."}</span>
+      <div className="space-y-3 border-b pb-4">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Link href="/deployments" className="transition-colors hover:text-foreground">应用部署</Link>
+          <ChevronRight className="h-3.5 w-3.5 opacity-60" />
+          <span className="font-medium text-foreground">{project?.name || "加载中..."}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-4">
-              {project?.name}
-              {project && (
-                <Badge variant="secondary" className="font-normal text-sm">
-                  {project.deployMethod || "PM2"}
-                </Badge>
-              )}
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              管理应用的部署配置、触发流水线及查看历史记录。
-            </p>
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex min-w-0 items-start gap-2.5">
+            <Button asChild variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+              <Link href="/deployments" aria-label="返回部署列表">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-2xl font-semibold tracking-tight">{project?.name || "加载中..."}</h1>
+                {project && (
+                  <Badge variant="secondary" className="font-normal text-xs">
+                    {project.deployMethod || "PM2"}
+                  </Badge>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                管理应用的部署配置、触发流水线及查看历史记录。
+              </p>
+            </div>
           </div>
-          <Button asChild variant="ghost" size="sm" className="gap-2">
-            <Link href="/deployments">
-              <ArrowLeft className="w-4 h-4" />
-              返回列表
-            </Link>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={fetchData} disabled={isLoading || actionLoading}>
+            <RefreshCw className={cn("h-4 w-4", (isLoading || actionLoading) && "animate-spin")} />
+            刷新
           </Button>
         </div>
       </div>
@@ -346,7 +383,7 @@ export default function DeploymentProjectDetailPage() {
           </Button>
         </div>
       ) : project ? (
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">概览与配置</TabsTrigger>
             <TabsTrigger value="history">部署记录</TabsTrigger>
@@ -589,20 +626,33 @@ export default function DeploymentProjectDetailPage() {
                       <p className="text-xs text-muted-foreground">从历史构建中选择版本，默认最新，便于安全回滚</p>
                     </div>
                   </div>
-                  <div className="mt-2 flex gap-2">
-                    <Select value={selectedArtifactUri} onValueChange={setSelectedArtifactUri}>
-                      <SelectTrigger className="font-mono text-sm">
-                        <SelectValue placeholder="请选择构建版本" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {artifactOptions.map((item) => (
-                          <SelectItem key={`${item.id}-${item.artifactUri}`} value={item.artifactUri}>
-                            {(item.buildId || "未标记版本") + " · " + item.artifactUri}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button onClick={handleManualTrigger} disabled={actionLoading}>
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="w-0 flex-1">
+                      <Select value={selectedArtifactUri} onValueChange={setSelectedArtifactUri}>
+                        <SelectTrigger className="w-full font-mono text-sm">
+                          <SelectValue placeholder="请选择构建版本">
+                            <span className="block truncate text-left" title={selectedArtifactLabel}>
+                              {selectedArtifactLabel}
+                            </span>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {artifactOptions.map((item) => {
+                            const version = item.buildId || "未标记版本";
+                            const fullLabel = `${version} · ${item.artifactUri}`;
+                            const displayLabel = `${version} · ${middleEllipsis(item.artifactUri)}`;
+                            return (
+                              <SelectItem key={`${item.id}-${item.artifactUri}`} value={item.artifactUri}>
+                                <span className="block max-w-[520px] truncate" title={fullLabel}>
+                                  {displayLabel}
+                                </span>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button className="sm:shrink-0" onClick={handleManualTrigger} disabled={actionLoading}>
                       <Play className="mr-2 w-4 h-4" />
                       部署
                     </Button>
@@ -619,14 +669,14 @@ export default function DeploymentProjectDetailPage() {
                       <p className="text-xs text-muted-foreground">上传本地 .tgz 或 .zip 文件进行部署</p>
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-2">
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
                     <Input 
                       id="file-upload"
                       type="file" 
                       onChange={(e) => setUploadFile(e.target.files?.[0] || null)} 
-                      className="file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                      className="min-w-0 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
                     />
-                    <Button onClick={handleUploadTrigger} disabled={actionLoading || !uploadFile}>
+                    <Button className="sm:shrink-0" onClick={handleUploadTrigger} disabled={actionLoading || !uploadFile}>
                       <UploadCloud className="mr-2 w-4 h-4" />
                       上传并部署
                     </Button>
